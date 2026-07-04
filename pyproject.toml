@@ -1,0 +1,6 @@
+[project]
+name = "mcgeeinfov2"
+version = "0.0.1"
+
+[tool.uv.workspace]
+members = ["apps/api", "packages/*"]

@@ -84,7 +84,7 @@ export default function PokerTable() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="mx-auto max-w-3xl px-6 py-10 lg:py-12"
+      className="mx-auto max-w-5xl px-6 py-10 lg:py-12"
     >
       <div className="flex items-center justify-between">
         <div>
@@ -103,30 +103,32 @@ export default function PokerTable() {
       </div>
 
       {/* Table */}
-      <div className="relative mt-8 rounded-[3rem] border-4 border-amber-900/40 bg-gradient-to-b from-emerald-800 to-emerald-950 px-6 pb-14 pt-8 shadow-2xl">
-        <p className="mb-3 text-center text-xs font-semibold uppercase tracking-wider text-emerald-200/60">
+      <div className="mt-8 rounded-[3rem] border-4 border-amber-900/40 bg-gradient-to-b from-emerald-800 to-emerald-950 px-8 py-10 shadow-2xl sm:px-12">
+        <p className="mb-4 text-center text-xs font-semibold uppercase tracking-wider text-emerald-200/60">
           Board
         </p>
-        <div className="flex justify-center gap-2">
+        <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
           {board.map((card, i) => (
-            <div key={i} className="flex flex-col items-center gap-1">
+            <div key={i} className="flex flex-col items-center gap-1.5">
               <PlayingCard card={card} onClick={() => openSlot('board', i)} />
-              {!card && <span className="text-[10px] text-emerald-200/40">{BOARD_LABELS[i]}</span>}
+              {!card && <span className="text-[11px] text-emerald-200/40">{BOARD_LABELS[i]}</span>}
             </div>
           ))}
         </div>
 
-        <div className="absolute left-1/2 -bottom-8 flex -translate-x-1/2 flex-col items-center gap-1.5">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-neutral-500">Your hand</span>
-          <div className="flex gap-2">
-            <PlayingCard card={hero[0]} onClick={() => openSlot('hero', 0)} />
-            <PlayingCard card={hero[1]} onClick={() => openSlot('hero', 1)} />
-          </div>
+        <div className="mx-auto my-8 h-px w-2/3 bg-emerald-700/40" />
+
+        <p className="mb-4 text-center text-xs font-semibold uppercase tracking-wider text-emerald-200/60">
+          Your hand
+        </p>
+        <div className="flex justify-center gap-3 sm:gap-4">
+          <PlayingCard card={hero[0]} onClick={() => openSlot('hero', 0)} />
+          <PlayingCard card={hero[1]} onClick={() => openSlot('hero', 1)} />
         </div>
       </div>
 
       {/* Controls */}
-      <div className="mt-14 flex flex-wrap items-center justify-between gap-4">
+      <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <span className="text-sm text-neutral-400">Opponents</span>
           <div className="flex items-center gap-2 rounded-full border border-neutral-800 px-1.5 py-1">

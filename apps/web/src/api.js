@@ -1,10 +1,9 @@
-// The API is a separately deployed service (see CLAUDE.md) — point this at wherever
-// it's actually reachable via VITE_API_URL at build time. Defaults to the local
-// `uv run uvicorn api.main:app --reload` dev port for local development.
-export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-
+// Same-origin relative paths — apps/api's routes already assume this (see docs_url="/api/docs"
+// in main.py), so whatever reverse proxy serves this site in production is expected to route
+// /api/* to the api service. Local dev gets the same relative-path behavior via the Vite dev
+// server proxy in vite.config.js, which forwards /api to the local uvicorn dev server.
 export async function getPokerEquity({ hero, board, opponents, trials }) {
-  const res = await fetch(`${API_URL}/api/poker/equity`, {
+  const res = await fetch('/api/poker/equity', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ hero, board, opponents, trials }),

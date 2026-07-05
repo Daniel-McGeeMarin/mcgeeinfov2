@@ -42,7 +42,7 @@ export default function WebAppCard({ app, index }) {
     </>
   )
 
-  const className = `group relative overflow-hidden rounded-2xl border p-5 transition ${
+  const className = `group relative block overflow-hidden rounded-2xl border p-5 transition ${
     isLive
       ? 'border-amber-400/30 bg-gradient-to-br from-amber-400/[0.07] to-transparent hover:border-amber-400/60'
       : 'border-neutral-800 bg-neutral-900/40 opacity-70'

@@ -91,11 +91,15 @@ packages/*/     one Python library per showcased project (uv workspace members)
   them all into one image — the packages are compiled into the single API container, not deployed
   separately. **Note:** this workflow only builds and pushes images — nothing in this repo deploys
   them. Whatever pulls new images onto the actual running server lives outside this repo.
-- `apps/web` and `apps/api` are two separately deployed services (not same-origin), so the frontend
-  calls the API by absolute URL via `apps/web/src/api.js`'s `VITE_API_URL` (Vite build-time env var,
-  defaults to `http://localhost:8000` for local dev). Set `VITE_API_URL` wherever `apps/web` is
-  actually built for production to point at the real API URL — CORS in `apps/api/src/api/main.py`
-  already allows `https://mcgeedan.com` as an origin, but doesn't know the API's own public URL.
+- `apps/web` and `apps/api` are two separately deployed containers, but the frontend calls the API
+  via same-origin relative paths (e.g. `fetch('/api/poker/equity')` in `apps/web/src/api.js`) —
+  this matches the `/api` prefix already baked into `apps/api/src/api/main.py`
+  (`docs_url="/api/docs"`), so whatever reverse proxy serves the site in production is expected to
+  route `/api/*` to the api container and everything else to the web container. Local dev gets the
+  same relative-path behavior via the Vite dev server proxy in `apps/web/vite.config.js`, which
+  forwards `/api` to `http://localhost:8000` (the `uv run uvicorn` dev port). Don't reintroduce an
+  absolute API URL (e.g. a `VITE_API_URL` env var defaulting to `localhost:8000`) — that breaks in
+  production because the browser would try to reach the *visitor's own* localhost, not the API.
 
 **To add a new showcased project:** create `packages/<name>` as a new uv workspace member with the
 ported logic, add it as a dependency of `apps/api` and mount a router for it in

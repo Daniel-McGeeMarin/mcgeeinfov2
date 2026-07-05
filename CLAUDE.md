@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Dan McGee-Marin's personal site, v2. Two goals, in tension:
+Dan McGee Marin's personal site, v2. Two goals, in tension:
 1. Host live, playable demos of his personal projects.
 2. Serve as a lightweight, recruiter-facing landing page.
 
@@ -41,6 +41,12 @@ language packages to this flake; if a package needs a dependency, add it via `uv
 nix develop                      # drop into the dev shell
 nix develop -c <command>         # or run a single command through it non-interactively
 ```
+
+**Gotcha:** uv installs real PyPI wheels (not nixpkgs derivations) into `.venv`, so any package with
+a compiled C-extension (numpy, etc.) fails at import with `ImportError: libstdc++.so.6` /
+`libz.so.1` — NixOS has no `/lib` for the dynamic linker to fall back to. The shellHook exports
+`LD_LIBRARY_PATH` (currently `stdenv.cc.cc.lib` + `zlib`) to cover this. If a new dependency fails
+the same way, add its `.so` to that `makeLibraryPath` list rather than working around it elsewhere.
 
 ## Commands
 
@@ -83,7 +89,13 @@ packages/*/     one Python library per showcased project (uv workspace members)
   images pushed to GHCR (`mcgeeinfov2-web`, `mcgeeinfov2-api`). `apps/api/Dockerfile` builds with
   repo root as context so it can `COPY` in `packages/*` alongside `apps/api` and `uv pip install`
   them all into one image — the packages are compiled into the single API container, not deployed
-  separately.
+  separately. **Note:** this workflow only builds and pushes images — nothing in this repo deploys
+  them. Whatever pulls new images onto the actual running server lives outside this repo.
+- `apps/web` and `apps/api` are two separately deployed services (not same-origin), so the frontend
+  calls the API by absolute URL via `apps/web/src/api.js`'s `VITE_API_URL` (Vite build-time env var,
+  defaults to `http://localhost:8000` for local dev). Set `VITE_API_URL` wherever `apps/web` is
+  actually built for production to point at the real API URL — CORS in `apps/api/src/api/main.py`
+  already allows `https://mcgeedan.com` as an origin, but doesn't know the API's own public URL.
 
 **To add a new showcased project:** create `packages/<name>` as a new uv workspace member with the
 ported logic, add it as a dependency of `apps/api` and mount a router for it in
@@ -103,11 +115,24 @@ restructure) was removed for this reason — if one reappears at the root instea
 
 ### Current state
 
-- `apps/api/src/api/main.py` is minimal so far: CORS middleware + `/api/health`. No routers for
-  `poker`/`resume` are mounted yet.
-- `packages/poker` and `packages/resume` exist as empty stub packages (`__init__.py` only, no
-  logic ported in). `../shortProjs/MonteCarloPoker.py` (single-file script, sibling directory) is
-  almost certainly the source to port into `packages/poker`.
+- `apps/api/src/api/main.py`: CORS middleware, `/api/health`, and the poker router
+  (`apps/api/src/api/routers/poker.py`, mounted via `app.include_router`). This is the pattern for
+  wiring up future packages: a router module per package, imported and included in `main.py`.
+- `packages/poker` is live: `engine.py` is Dan's original `MonteCarloPoker.py`
+  (`../shortProjs/MonteCarloPoker.py`) ported near-verbatim (only the bottom-level `print(...)` call
+  got wrapped in `if __name__ == "__main__":` so importing the module doesn't execute it).
+  `__init__.py` adds a new, separate `simulate_equity()`/`parse_card()` wrapper — it does not modify
+  `engine.py`'s logic, just parameterizes what `MonteCarloSim()` hardcoded. Fronted by
+  `/apps/poker` in `apps/web` (`PokerTable.jsx` + `PlayingCard`/`CardPicker` components), which
+  calls the API via `apps/web/src/api.js` (`VITE_API_URL`, defaults to `http://localhost:8000`).
+  **Note:** `GameEngine.runGame()`'s `max()` tie-break assigns an exact tie to the lowest-index
+  hand rather than splitting equity — a pre-existing property of the original algorithm, not
+  something introduced during porting.
+  Every `packages/*` and `apps/api` pyproject.toml needs a `[build-system]`/`hatchling` section
+  (added when this was wired up) — without one, uv treats the project as "virtual" and won't
+  install its own code as an importable package, only its dependencies.
+- `packages/resume` still exists as an empty stub package (`__init__.py` only, no logic ported in,
+  no router mounted).
 - Other sibling repos surveyed as candidates for future `packages/*` (not yet migrated):
   - `../AutoJobApplyer` — Python job-application-automation app (`app.py`, `src/`, `web/`).
   - `../MarketMakerApp` — Python `backend/` + separate `frontend/`; if folded in, its frontend

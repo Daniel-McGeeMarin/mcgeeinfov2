@@ -1,5 +1,5 @@
 export const profile = {
-  name: "Dan McGee-Marin",
+  name: "Dan McGee Marin",
   tagline: "EECS + Business @ Berkeley. I like digging into problems that are messy before they're clear.",
   avatar: "/images/profile.webp",
   resumeUrl: "/resume.pdf",
@@ -36,7 +36,9 @@ export const webApps = [
     name: "Poker Odds Simulator",
     description: "Monte Carlo hand-equity simulator — see how your odds shift street by street.",
     tags: ["Python", "Monte Carlo"],
-    status: "soon",
+    status: "live",
+    href: "/apps/poker",
+    noAI: true,
   },
 ]
 
@@ -91,13 +93,16 @@ export const projects = [
     description: "Open-source TOTP app: a PyQt desktop app paired with a browser extension for one-click OTP entry.",
     image: "/images/projects/saifu.webp",
     tags: ["PyQt", "Android"],
-    githubUrl: "https://github.com/saifuTOTP/SaifuQT",
+    links: [{ type: "github", url: "https://github.com/saifuTOTP/SaifuQT" }],
   },
   {
     title: "XiaDrum",
     description: "ML classification model running on an Arduino device to alert deaf users in warzones to gunshots and sirens.",
     image: "/images/projects/xiadrum.webp",
     tags: ["Arduino", "Machine Learning", "C++"],
-    videoUrl: "https://youtu.be/1NAGmKSUVCw",
+    links: [
+      { type: "video", url: "https://youtu.be/1NAGmKSUVCw" },
+      { type: "doc", url: "https://docs.google.com/document/d/1K67M3En9TeIwjuI9g7NHuw_1mYvBYwCCJZ-rnfCE9f8/edit?usp=sharing" },
+    ],
   },
 ]

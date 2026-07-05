@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar'
 import Portfolio from './pages/Portfolio'
 import About from './pages/About'
 import Resume from './pages/Resume'
+import PokerTable from './pages/PokerTable'
 
 function AnimatedRoutes() {
   const location = useLocation()
@@ -13,6 +14,7 @@ function AnimatedRoutes() {
         <Route path="/" element={<Portfolio />} />
         <Route path="/about" element={<About />} />
         <Route path="/resume" element={<Resume />} />
+        <Route path="/apps/poker" element={<PokerTable />} />
       </Routes>
     </AnimatePresence>
   )

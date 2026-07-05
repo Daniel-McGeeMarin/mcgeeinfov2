@@ -30,6 +30,14 @@ export default function WebAppCard({ app, index }) {
             {tag}
           </span>
         ))}
+        {app.noAI && (
+          <span
+            title="Backend written entirely by hand, no AI assistance"
+            className="rounded-full border border-violet-400/30 bg-violet-400/10 px-2 py-0.5 text-[11px] font-medium text-violet-300"
+          >
+            No AI · hand-coded
+          </span>
+        )}
       </div>
     </>
   )

@@ -1,13 +1,21 @@
 import { motion } from 'framer-motion'
-import { PlayCircle } from 'lucide-react'
+import { PlayCircle, FileText } from 'lucide-react'
 import { GithubIcon } from './BrandIcons'
 
+const ICONS = {
+  github: GithubIcon,
+  video: PlayCircle,
+  doc: FileText,
+}
+
+const LABELS = {
+  github: 'View on GitHub',
+  video: 'Watch demo',
+  doc: 'Read writeup',
+}
+
 export default function ProjectCard({ project, index }) {
-  const link = project.githubUrl
-    ? { href: project.githubUrl, label: 'Code', icon: GithubIcon }
-    : project.videoUrl
-      ? { href: project.videoUrl, label: 'Watch demo', icon: PlayCircle }
-      : null
+  const links = project.links ?? []
 
   return (
     <motion.article
@@ -26,7 +34,29 @@ export default function ProjectCard({ project, index }) {
         />
       </div>
       <div className="flex flex-1 flex-col gap-3 p-4">
-        <h3 className="text-sm font-semibold text-neutral-100">{project.title}</h3>
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="text-sm font-semibold text-neutral-100">{project.title}</h3>
+          {links.length > 0 && (
+            <div className="flex shrink-0 items-center gap-2">
+              {links.map(({ type, url }) => {
+                const Icon = ICONS[type]
+                return (
+                  <a
+                    key={type + url}
+                    href={url}
+                    target="_blank"
+                    rel="noreferrer"
+                    title={LABELS[type]}
+                    aria-label={LABELS[type]}
+                    className="text-neutral-500 transition hover:text-amber-300"
+                  >
+                    <Icon size={15} />
+                  </a>
+                )
+              })}
+            </div>
+          )}
+        </div>
         <p className="flex-1 text-sm leading-relaxed text-neutral-400">{project.description}</p>
         <div className="flex flex-wrap gap-1.5">
           {project.tags.map((tag) => (
@@ -38,17 +68,6 @@ export default function ProjectCard({ project, index }) {
             </span>
           ))}
         </div>
-        {link && (
-          <a
-            href={link.href}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-1 inline-flex items-center gap-1.5 text-xs font-medium text-neutral-400 transition hover:text-amber-300"
-          >
-            <link.icon size={14} />
-            {link.label}
-          </a>
-        )}
       </div>
     </motion.article>
   )

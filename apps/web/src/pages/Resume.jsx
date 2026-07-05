@@ -26,7 +26,7 @@ export default function Resume() {
       <div className="mt-6 overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900/40">
         <iframe
           src={profile.resumeUrl}
-          title="Dan McGee-Marin's resume"
+          title="Dan McGee Marin's resume"
           className="h-[80vh] w-full"
         />
       </div>

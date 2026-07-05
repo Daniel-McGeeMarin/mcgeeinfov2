@@ -13,8 +13,7 @@ export const profile = {
 export const about = {
   image: "/images/about.webp",
   paragraphs: [
-    "Hello! I'm Dan, a student at UC Berkeley majoring in EECS and Business. I really enjoy digging into tough problems, especially navigating the initial ambiguity where the path forward isn't clear and it's largely about learning and troubleshooting. A lot of this mindset comes from years of tinkering with Arch Linux, where I often have to be resourceful in order to fix my poor computer after my latest customization imploded it! I really like clever solutions that simplify things for people, whether that's rethinking a user experience to be radically easier or writing a script/agentic workflow to automate a time-consuming task.",
-    "My goal is to build well designed and managed institutions capable of transforming both small and large scale communities. I believe these kind of institutions not only need engineering skills to identify core problems (or opportunities) and design technical solutions, but also business knowledge to design the institutional framework required for these solutions to have a lasting impact. I'm especially interested in applying this approach in areas like education and finance to build the kinds of sustainable systems that become engines for opportunity and community growth.",
+    "Hello! I'm Dan",
     "Some of my favorite books are Why Nations Fail, Plato's Republic, and Weapons of Math Destruction. I'd love to chat about any of them, so feel free to send me an email!",
     "When I'm not working, you can usually find me reading, fixing my Linux setup (after it inevitably breaks in my quest to get sub 8 second boot), or playing Poker and MTG.",
   ],

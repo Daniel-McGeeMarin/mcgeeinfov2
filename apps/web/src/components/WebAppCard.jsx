@@ -14,7 +14,7 @@ export default function WebAppCard({ app, index }) {
             className={isLive ? 'fill-emerald-400 text-emerald-400 animate-pulse' : 'fill-neutral-700 text-neutral-700'}
           />
           <span className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
-            {isLive ? 'Live demo' : 'Coming soon'}
+            {isLive ? 'Live webapp' : 'Coming soon'}
           </span>
         </div>
         {isLive && <ArrowUpRight size={16} className="text-neutral-500 transition group-hover:text-amber-300" />}

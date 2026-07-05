@@ -1,19 +1,32 @@
-import Nav from './components/Nav'
-import Hero from './components/Hero'
-import About from './components/About'
-import Projects from './components/Projects'
-import Contact from './components/Contact'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { AnimatePresence } from 'framer-motion'
+import Sidebar from './components/Sidebar'
+import Portfolio from './pages/Portfolio'
+import About from './pages/About'
+import Resume from './pages/Resume'
+
+function AnimatedRoutes() {
+  const location = useLocation()
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<Portfolio />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/resume" element={<Resume />} />
+      </Routes>
+    </AnimatePresence>
+  )
+}
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-white text-neutral-900">
-      <Nav />
-      <main>
-        <Hero />
-        <About />
-        <Projects />
-        <Contact />
-      </main>
-    </div>
+    <BrowserRouter>
+      <div className="min-h-screen bg-neutral-950 text-neutral-100">
+        <Sidebar />
+        <main className="pt-14 lg:pt-0 lg:pl-64">
+          <AnimatedRoutes />
+        </main>
+      </div>
+    </BrowserRouter>
   )
 }

@@ -5,6 +5,7 @@ import Portfolio from './pages/Portfolio'
 import About from './pages/About'
 import Resume from './pages/Resume'
 import PokerTable from './pages/PokerTable'
+import SessionTimer from './pages/SessionTimer'
 
 function AnimatedRoutes() {
   const location = useLocation()
@@ -15,6 +16,7 @@ function AnimatedRoutes() {
         <Route path="/about" element={<About />} />
         <Route path="/resume" element={<Resume />} />
         <Route path="/apps/poker" element={<PokerTable />} />
+        <Route path="/apps/session-timer" element={<SessionTimer />} />
       </Routes>
     </AnimatePresence>
   )

@@ -29,9 +29,10 @@ export const about = {
   ],
 }
 
-// Apps that actually run live, in-browser, on this site — backed by packages/* in the
-// monorepo (see CLAUDE.md). Shown both as a quick-jump list in the sidebar and as
-// highlighted cards on the Portfolio page. `status: "soon"` renders as non-clickable.
+// Apps that actually run live, in-browser, on this site. Most are backed by packages/* in
+// the monorepo (see CLAUDE.md); some (Session Timer) are pure frontend with no backend at
+// all. Shown both as a quick-jump list in the sidebar and as highlighted cards on the
+// Portfolio page. `status: "soon"` renders as non-clickable.
 export const webApps = [
   {
     name: "Poker Odds Simulator",
@@ -40,6 +41,13 @@ export const webApps = [
     status: "live",
     href: "/apps/poker",
     noAI: true,
+  },
+  {
+    name: "Session Timer",
+    description: "Paste a schedule, run through it segment by segment with alarms and smart snoozing.",
+    tags: ["React", "Web Audio API"],
+    status: "live",
+    href: "/apps/session-timer",
   },
 ]
 

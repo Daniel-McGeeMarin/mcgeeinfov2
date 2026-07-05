@@ -13,9 +13,11 @@ export const profile = {
 export const about = {
   image: "/images/about.webp",
   paragraphs: [
-    "Hello! I'm Dan",
-    "Some of my favorite books are Why Nations Fail, Plato's Republic, and Weapons of Math Destruction. I'd love to chat about any of them, so feel free to send me an email!",
-    "When I'm not working, you can usually find me reading, fixing my Linux setup (after it inevitably breaks in my quest to get sub 8 second boot), or playing Poker and MTG.",
+    "I study EECS and Business at UC Berkeley and like tackling problems that force you to think clearly about systems, constraints, and user interactions. A lot of this comes from working deeply with Linux and from building tools, workflows, and automation that simplify messy processes.",
+    "My recent experience spans full-stack engineering, ML workflows, economic data analysis, and automation projects from building AI agents at GenPF and Farther to running modeling pipelines at Berkeley Nanotech and Flux Robotics. Across these, I like clean, reliable solutions that reduce friction for users.",
+    "I'm interested in engineering work that fits into real team and organizational workflows. For example, at ReNewport, I worked with a small team to ship an air quality dashboard used across the city by residents, planners, and advocacy groups. I find these kind of projects make you think beyond code, as how a tool fits into a group/communities workflow, how to turn it into an organization that can be maintained without your direct management, and how scale past a single deployment become major components of the puzzle.",
+    "Long term, I'm interested in helping build and manage organizations that support research, education, and community development. I see institutions as systems with their own constraints: teams, incentives, culture, and the technical infrastructure that makes their work possible.",
+    "Outside of work, I read a lot (Why Nations Fail, Republic, and Weapons of Math Destruction are favorites), tune my Linux setup, and play Poker and Magic The Gathering.",
   ],
   interests: [
     "Python, Java, R, MATLAB",

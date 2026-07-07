@@ -6,6 +6,8 @@ import About from './pages/About'
 import Resume from './pages/Resume'
 import PokerTable from './pages/PokerTable'
 import SessionTimer from './pages/SessionTimer'
+import Jobs from './pages/Jobs'
+import JobQueue from './pages/JobQueue'
 
 function AnimatedRoutes() {
   const location = useLocation()
@@ -17,6 +19,8 @@ function AnimatedRoutes() {
         <Route path="/resume" element={<Resume />} />
         <Route path="/apps/poker" element={<PokerTable />} />
         <Route path="/apps/session-timer" element={<SessionTimer />} />
+        <Route path="/apps/jobs" element={<Jobs />} />
+        <Route path="/apps/jobs/queue" element={<JobQueue />} />
       </Routes>
     </AnimatePresence>
   )

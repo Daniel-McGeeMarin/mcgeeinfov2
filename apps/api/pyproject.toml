@@ -7,11 +7,13 @@ dependencies = [
     "uvicorn[standard]>=0.32.0",
     "poker",
     "resume",
+    "jobs",
 ]
 
 [tool.uv.sources]
 poker  = { workspace = true }
 resume = { workspace = true }
+jobs   = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]

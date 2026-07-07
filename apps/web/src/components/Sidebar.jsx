@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { NavLink, Link } from 'react-router-dom'
-import { LayoutGrid, UserRound, FileText, Menu, X, Circle } from 'lucide-react'
+import { LayoutGrid, UserRound, FileText, Menu, X, Circle, Lock } from 'lucide-react'
 import { profile, webApps } from '../content'
 
 const pageLinks = [
@@ -40,6 +40,27 @@ function NavItems({ onNavigate }) {
         <ul className="mt-2 flex flex-col gap-0.5">
           {webApps.map((app) => {
             const isLive = app.status === 'live'
+
+            if (app.private) {
+              return (
+                <li key={app.name} className="group/app relative">
+                  <Link
+                    to={app.href}
+                    onClick={onNavigate}
+                    className="flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm text-neutral-500 transition-colors hover:bg-neutral-900 hover:text-neutral-300"
+                  >
+                    <Lock size={10} className="shrink-0 text-neutral-600" />
+                    <span className="truncate">{app.name}</span>
+                  </Link>
+                  <div className="pointer-events-none absolute left-full top-0 z-50 ml-3 w-60 rounded-lg border border-neutral-800 bg-neutral-900 p-3 text-xs text-neutral-400 opacity-0 shadow-xl transition-opacity group-hover/app:opacity-100">
+                    <p className="mb-1 font-medium text-neutral-300">{app.name}</p>
+                    <p className="leading-relaxed">{app.description}</p>
+                    <p className="mt-2 text-[10px] text-neutral-600 uppercase tracking-wide">Private — requires login</p>
+                  </div>
+                </li>
+              )
+            }
+
             const content = (
               <>
                 <Circle

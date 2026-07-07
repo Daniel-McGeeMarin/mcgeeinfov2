@@ -49,6 +49,14 @@ export const webApps = [
     status: "live",
     href: "/apps/session-timer",
   },
+  {
+    name: "Job Browser",
+    description: "Private internship aggregator — pulls Summer 2027 listings from GitHub sources, deduplicates by canonical URL, enriches via page scraping, and tracks applications in a personal queue.",
+    tags: ["Python", "SQLite", "FastAPI"],
+    status: "live",
+    href: "/apps/jobs",
+    private: true,
+  },
 ]
 
 // Standalone project writeups — mostly coursework/personal builds without a hosted demo.

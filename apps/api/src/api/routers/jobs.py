@@ -18,6 +18,10 @@ router = APIRouter(prefix="/api/jobs", tags=["jobs"])
 _db = DB(Path(os.environ.get("JOBS_DB_PATH", "./jobs.db")))
 _ingester = Ingester(_db)
 
+
+def get_ingester() -> Ingester:
+    return _ingester
+
 # ---------------------------------------------------------------------------
 # Sources & refresh — defined before /{job_id} to avoid route capture
 # ---------------------------------------------------------------------------

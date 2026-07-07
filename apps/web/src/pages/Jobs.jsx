@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { ChevronDown } from 'lucide-react'
 import { jobsApi } from '../api'
 
 // ---------------------------------------------------------------------------
@@ -60,6 +61,61 @@ const FILTERABLE_TAGS = [
 ]
 
 // ---------------------------------------------------------------------------
+// MultiSelectDropdown
+// ---------------------------------------------------------------------------
+function MultiSelectDropdown({ label, options, selected, onToggle }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+  const count = selected.size
+
+  useEffect(() => {
+    if (!open) return
+    const handler = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [open])
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen(v => !v)}
+        className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors ${
+          count > 0
+            ? 'border-amber-400/40 bg-amber-400/10 text-amber-300'
+            : 'border-neutral-800 bg-neutral-900 text-neutral-400 hover:text-neutral-200 hover:border-neutral-700'
+        }`}
+      >
+        {label}{count > 0 ? ` (${count})` : ''}
+        <ChevronDown size={11} className={`transition-transform duration-150 ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      {open && (
+        <div className="absolute top-full left-0 mt-1 z-50 min-w-[180px] rounded-lg border border-neutral-800 bg-neutral-950 shadow-xl py-1">
+          {options.map(opt => (
+            <label
+              key={opt.value}
+              className="flex items-center gap-2.5 px-3 py-1.5 text-xs cursor-pointer hover:bg-neutral-800/60 transition-colors"
+            >
+              <input
+                type="checkbox"
+                checked={selected.has(opt.value)}
+                onChange={() => onToggle(opt.value)}
+                className="accent-amber-400 shrink-0"
+              />
+              <span className={selected.has(opt.value) ? 'text-neutral-100' : 'text-neutral-400'}>
+                {opt.label}
+              </span>
+            </label>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Small components
 // ---------------------------------------------------------------------------
 
@@ -89,29 +145,14 @@ function SourceBadge({ sourceId, company }) {
   )
 }
 
-function FilterPill({ label, active, onClick }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
-        active
-          ? 'bg-amber-400/20 text-amber-300 ring-1 ring-amber-400/40'
-          : 'bg-neutral-800 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-700'
-      }`}
-    >
-      {label}
-    </button>
-  )
-}
-
 function ToggleButton({ label, active, onClick }) {
   return (
     <button
       onClick={onClick}
-      className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+      className={`rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors ${
         active
-          ? 'bg-neutral-700 text-neutral-100'
-          : 'bg-neutral-800 text-neutral-400 hover:text-neutral-200'
+          ? 'border-neutral-600 bg-neutral-700 text-neutral-100'
+          : 'border-neutral-800 bg-neutral-900 text-neutral-400 hover:text-neutral-200 hover:border-neutral-700'
       }`}
     >
       {label}
@@ -132,9 +173,9 @@ export default function Jobs() {
   const [sources, setSources]     = useState([])
 
   // Filters
-  const [typeFilter, setTypeFilter]         = useState('')
-  const [searchQ, setSearchQ]               = useState('')
-  const [selectedTags, setSelectedTags]     = useState(new Set())
+  const [typeFilter, setTypeFilter]           = useState('')
+  const [searchQ, setSearchQ]                 = useState('')
+  const [selectedTags, setSelectedTags]       = useState(new Set())
   const [selectedSources, setSelectedSources] = useState(new Set())
 
   // View options
@@ -240,6 +281,12 @@ export default function Jobs() {
     }
   }
 
+  const tagOptions = FILTERABLE_TAGS.map(t => ({ value: t, label: TAG_META[t]?.label ?? t }))
+  const sourceOptions = sources.map(s => ({
+    value: s.source_id,
+    label: SOURCE_META[s.source_id]?.label ?? s.source_id,
+  }))
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -260,10 +307,10 @@ export default function Jobs() {
         </div>
         <div className="flex flex-wrap gap-2">
           <ToggleButton label="Source columns" active={showSourceCols} onClick={() => setShowSourceCols(v => !v)} />
-          <button onClick={handleRefresh} className="rounded-lg bg-neutral-800 px-3 py-1.5 text-xs text-neutral-200 hover:bg-neutral-700 transition-colors">
+          <button onClick={handleRefresh} className="rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-1.5 text-xs text-neutral-400 hover:text-neutral-200 hover:border-neutral-700 transition-colors">
             Refresh sources
           </button>
-          <button onClick={handleEnrich} className="rounded-lg bg-neutral-800 px-3 py-1.5 text-xs text-neutral-200 hover:bg-neutral-700 transition-colors">
+          <button onClick={handleEnrich} className="rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-1.5 text-xs text-neutral-400 hover:text-neutral-200 hover:border-neutral-700 transition-colors">
             Enrich (50)
           </button>
         </div>
@@ -271,68 +318,43 @@ export default function Jobs() {
 
       {actionMsg && <p className="mb-4 text-sm text-amber-300">{actionMsg}</p>}
 
-      {/* Filters */}
-      <div className="mb-5 space-y-3">
-        {/* Row 1: search + type */}
-        <div className="flex flex-wrap gap-2 items-center">
-          <input
-            type="text"
-            placeholder="Search company, role, location…"
-            value={searchQ}
-            onChange={e => setSearchQ(e.target.value)}
-            className="rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-1.5 text-sm text-neutral-100 placeholder-neutral-600 focus:outline-none focus:ring-1 focus:ring-amber-400 w-64"
+      {/* Filters — single row */}
+      <div className="mb-5 flex flex-wrap gap-2 items-center">
+        <input
+          type="text"
+          placeholder="Search company, role, location…"
+          value={searchQ}
+          onChange={e => setSearchQ(e.target.value)}
+          className="rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-1.5 text-sm text-neutral-100 placeholder-neutral-600 focus:outline-none focus:ring-1 focus:ring-amber-400/50 w-56"
+        />
+        <select
+          value={typeFilter}
+          onChange={e => setTypeFilter(e.target.value)}
+          className="rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-1.5 text-xs text-neutral-400 focus:outline-none focus:ring-1 focus:ring-amber-400/50"
+        >
+          <option value="">All types</option>
+          <option value="summer">Summer</option>
+          <option value="offseason">Off-season</option>
+          <option value="new_grad">New Grad</option>
+        </select>
+        <MultiSelectDropdown
+          label="Tags"
+          options={tagOptions}
+          selected={selectedTags}
+          onToggle={toggleTag}
+        />
+        {sourceOptions.length > 0 && (
+          <MultiSelectDropdown
+            label="Sources"
+            options={sourceOptions}
+            selected={selectedSources}
+            onToggle={toggleSource}
           />
-          <select
-            value={typeFilter}
-            onChange={e => setTypeFilter(e.target.value)}
-            className="rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-1.5 text-sm text-neutral-300"
-          >
-            <option value="">All types</option>
-            <option value="summer">Summer</option>
-            <option value="offseason">Off-season</option>
-            <option value="new_grad">New Grad</option>
-          </select>
-          {hasFilters && (
-            <button onClick={clearAll} className="text-xs text-neutral-500 hover:text-neutral-300 transition-colors">
-              Clear all
-            </button>
-          )}
-        </div>
-
-        {/* Row 2: tag pills */}
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-xs text-neutral-600 mr-1">Tags:</span>
-          {FILTERABLE_TAGS.map(tag => (
-            <FilterPill
-              key={tag}
-              label={TAG_META[tag]?.label ?? tag}
-              active={selectedTags.has(tag)}
-              onClick={() => toggleTag(tag)}
-            />
-          ))}
-        </div>
-
-        {/* Row 3: source pills */}
-        {sources.length > 0 && (
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-xs text-neutral-600 mr-1">Sources:</span>
-            {sources.map(s => (
-              <FilterPill
-                key={s.source_id}
-                label={SOURCE_META[s.source_id]?.label ?? s.source_id}
-                active={selectedSources.has(s.source_id)}
-                onClick={() => toggleSource(s.source_id)}
-              />
-            ))}
-            {/* Last-run status on hover via title */}
-            {showSourceCols && (
-              <span className="ml-2 text-[11px] text-neutral-700">
-                {sources.map(s =>
-                  `${SOURCE_META[s.source_id]?.label ?? s.source_id}: ${s.last_run_at ? new Date(s.last_run_at).toLocaleDateString() : 'never'}`
-                ).join(' · ')}
-              </span>
-            )}
-          </div>
+        )}
+        {hasFilters && (
+          <button onClick={clearAll} className="text-xs text-neutral-500 hover:text-neutral-300 transition-colors">
+            Clear all
+          </button>
         )}
       </div>
 

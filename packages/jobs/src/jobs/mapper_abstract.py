@@ -47,6 +47,24 @@ class MapperAbstract:
     def _parse_markdown_table(self, md: str, config: dict) -> list[dict[str, str]]:
         marker = config.get("table_start_marker") or "|"
         lines = md.splitlines()
+        rows: list[dict[str, str]] = []
+
+        if config.get("multi_table"):
+            i = 0
+            while i < len(lines):
+                ln = lines[i]
+                if marker in ln and ln.strip().startswith("|"):
+                    headers = [c.strip() for c in ln.split("|")[1:-1]]
+                    i += 2  # skip separator row
+                    while i < len(lines) and lines[i].strip().startswith("|"):
+                        cells = [c.strip() for c in lines[i].split("|")[1:-1]]
+                        cells = (cells + [""] * len(headers))[: len(headers)]
+                        rows.append(dict(zip(headers, cells)))
+                        i += 1
+                else:
+                    i += 1
+            return rows
+
         start = next(
             (i for i, ln in enumerate(lines) if marker in ln and ln.strip().startswith("|")),
             None,
@@ -54,7 +72,6 @@ class MapperAbstract:
         if start is None:
             return []
         headers = [c.strip() for c in lines[start].split("|")[1:-1]]
-        rows: list[dict[str, str]] = []
         for ln in lines[start + 2:]:
             if not ln.strip().startswith("|"):
                 break
@@ -71,8 +88,11 @@ class MapperAbstract:
             "type": config.get("row_type"),
             "tags": [], "source_ids": [self.SOURCE_ID],
         }
+        strip_html = config.get("strip_html_fields") or []
         for src_key, universal_key in mapping.items():
             val = row.get(src_key) or ""
+            if src_key in strip_html and val:
+                val = re.sub(r"<[^>]+>", "", val).strip()
             if universal_key == "apply_url" and val:
                 extract_re = config.get("extract_apply_url")
                 if extract_re:

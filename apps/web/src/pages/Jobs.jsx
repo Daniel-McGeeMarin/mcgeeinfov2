@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Check, X } from 'lucide-react'
 import { jobsApi } from '../api'
 
 // ---------------------------------------------------------------------------
@@ -61,12 +61,31 @@ const FILTERABLE_TAGS = [
 ]
 
 // ---------------------------------------------------------------------------
-// MultiSelectDropdown
+// MultiSelectDropdown — supports 2-state (selected/onToggle) and 3-state
+// (stateMap/onCycle: null → 'include' → 'exclude' → null) modes
 // ---------------------------------------------------------------------------
-function MultiSelectDropdown({ label, options, selected, onToggle }) {
+function ThreeStateBox({ state }) {
+  if (state === 'include') return (
+    <span className="flex items-center justify-center w-3.5 h-3.5 rounded-sm bg-amber-400 shrink-0">
+      <Check size={9} strokeWidth={3} className="text-neutral-900" />
+    </span>
+  )
+  if (state === 'exclude') return (
+    <span className="flex items-center justify-center w-3.5 h-3.5 rounded-sm bg-red-500 shrink-0">
+      <X size={9} strokeWidth={3} className="text-white" />
+    </span>
+  )
+  return <span className="w-3.5 h-3.5 rounded-sm border border-neutral-600 shrink-0 inline-block" />
+}
+
+function MultiSelectDropdown({ label, options, selected, onToggle, stateMap, onCycle }) {
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
-  const count = selected.size
+
+  const isThreeState = stateMap !== undefined
+  const count = isThreeState ? stateMap.size : (selected?.size ?? 0)
+  const includeCount = isThreeState ? [...stateMap.values()].filter(v => v === 'include').length : 0
+  const excludeCount = isThreeState ? [...stateMap.values()].filter(v => v === 'exclude').length : 0
 
   useEffect(() => {
     if (!open) return
@@ -76,6 +95,16 @@ function MultiSelectDropdown({ label, options, selected, onToggle }) {
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [open])
+
+  let countLabel = ''
+  if (isThreeState && count > 0) {
+    const parts = []
+    if (includeCount > 0) parts.push(`+${includeCount}`)
+    if (excludeCount > 0) parts.push(`−${excludeCount}`)
+    countLabel = ` (${parts.join(' ')})`
+  } else if (!isThreeState && count > 0) {
+    countLabel = ` (${count})`
+  }
 
   return (
     <div className="relative" ref={ref}>
@@ -87,28 +116,43 @@ function MultiSelectDropdown({ label, options, selected, onToggle }) {
             : 'border-neutral-800 bg-neutral-900 text-neutral-400 hover:text-neutral-200 hover:border-neutral-700'
         }`}
       >
-        {label}{count > 0 ? ` (${count})` : ''}
+        {label}{countLabel}
         <ChevronDown size={11} className={`transition-transform duration-150 ${open ? 'rotate-180' : ''}`} />
       </button>
 
       {open && (
         <div className="absolute top-full left-0 mt-1 z-50 min-w-[180px] rounded-lg border border-neutral-800 bg-neutral-950 shadow-xl py-1">
-          {options.map(opt => (
-            <label
-              key={opt.value}
-              className="flex items-center gap-2.5 px-3 py-1.5 text-xs cursor-pointer hover:bg-neutral-800/60 transition-colors"
-            >
-              <input
-                type="checkbox"
-                checked={selected.has(opt.value)}
-                onChange={() => onToggle(opt.value)}
-                className="accent-amber-400 shrink-0"
-              />
-              <span className={selected.has(opt.value) ? 'text-neutral-100' : 'text-neutral-400'}>
-                {opt.label}
-              </span>
-            </label>
-          ))}
+          {options.map(opt => {
+            if (isThreeState) {
+              const state = stateMap.get(opt.value) || null
+              return (
+                <div
+                  key={opt.value}
+                  onClick={() => onCycle(opt.value)}
+                  className="flex items-center gap-2.5 px-3 py-1.5 text-xs cursor-pointer hover:bg-neutral-800/60 transition-colors select-none"
+                >
+                  <ThreeStateBox state={state} />
+                  <span className={state ? 'text-neutral-100' : 'text-neutral-400'}>{opt.label}</span>
+                </div>
+              )
+            }
+            return (
+              <label
+                key={opt.value}
+                className="flex items-center gap-2.5 px-3 py-1.5 text-xs cursor-pointer hover:bg-neutral-800/60 transition-colors"
+              >
+                <input
+                  type="checkbox"
+                  checked={selected.has(opt.value)}
+                  onChange={() => onToggle(opt.value)}
+                  className="accent-amber-400 shrink-0"
+                />
+                <span className={selected.has(opt.value) ? 'text-neutral-100' : 'text-neutral-400'}>
+                  {opt.label}
+                </span>
+              </label>
+            )
+          })}
         </div>
       )}
     </div>
@@ -175,7 +219,7 @@ export default function Jobs() {
   // Filters
   const [typeFilter, setTypeFilter]           = useState('')
   const [searchQ, setSearchQ]                 = useState('')
-  const [selectedTags, setSelectedTags]       = useState(new Set())
+  const [selectedTags, setSelectedTags]       = useState(new Map())
   const [selectedSources, setSelectedSources] = useState(new Set())
 
   // View options
@@ -215,7 +259,10 @@ export default function Jobs() {
 
       if (selectedTags.size > 0) {
         const jobTags = new Set(job.tags || [])
-        if (![...selectedTags].some(t => jobTags.has(t))) return false
+        const includeTags = [...selectedTags.entries()].filter(([,v]) => v === 'include').map(([k]) => k)
+        const excludeTags = [...selectedTags.entries()].filter(([,v]) => v === 'exclude').map(([k]) => k)
+        if (includeTags.length > 0 && !includeTags.some(t => jobTags.has(t))) return false
+        if (excludeTags.some(t => jobTags.has(t))) return false
       }
 
       if (selectedSources.size > 0) {
@@ -229,8 +276,11 @@ export default function Jobs() {
 
   const toggleTag = (tag) => {
     setSelectedTags(prev => {
-      const next = new Set(prev)
-      next.has(tag) ? next.delete(tag) : next.add(tag)
+      const next = new Map(prev)
+      const state = next.get(tag)
+      if (!state) next.set(tag, 'include')
+      else if (state === 'include') next.set(tag, 'exclude')
+      else next.delete(tag)
       return next
     })
   }
@@ -246,7 +296,7 @@ export default function Jobs() {
   const clearAll = () => {
     setTypeFilter('')
     setSearchQ('')
-    setSelectedTags(new Set())
+    setSelectedTags(new Map())
     setSelectedSources(new Set())
   }
 
@@ -340,8 +390,8 @@ export default function Jobs() {
         <MultiSelectDropdown
           label="Tags"
           options={tagOptions}
-          selected={selectedTags}
-          onToggle={toggleTag}
+          stateMap={selectedTags}
+          onCycle={toggleTag}
         />
         {sourceOptions.length > 0 && (
           <MultiSelectDropdown

@@ -32,12 +32,12 @@ const SOURCE_META = {
   speedyapply_swe_2027: {
     label: 'SpeedyApply SWE',
     fileUrl: (company) =>
-      `https://github.com/speedyapply/2027-SWE-College-Jobs/blob/main/INTERN_USA.md#:~:text=${encodeURIComponent(company)}`,
+      `https://github.com/speedyapply/2027-SWE-College-Jobs/blob/main/README.md#:~:text=${encodeURIComponent(company)}`,
   },
   speedyapply_ai_2027: {
     label: 'SpeedyApply AI',
     fileUrl: (company) =>
-      `https://github.com/speedyapply/2027-AI-College-Jobs/blob/main/INTERN_USA.md#:~:text=${encodeURIComponent(company)}`,
+      `https://github.com/speedyapply/2027-AI-College-Jobs/blob/main/README.md#:~:text=${encodeURIComponent(company)}`,
   },
 }
 

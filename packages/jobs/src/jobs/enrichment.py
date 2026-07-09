@@ -49,6 +49,16 @@ def detect_apply_type(apply_url: str) -> str | None:
     return None  # unknown — will be set to "standard" after page fetch succeeds
 
 
+def detect_workday(apply_url: str) -> bool:
+    if not apply_url:
+        return False
+    try:
+        host = urlparse(apply_url).netloc.lower().lstrip("www.")
+        return host == "myworkdayjobs.com" or host.endswith(".myworkdayjobs.com")
+    except Exception:
+        return False
+
+
 def detect_high_impact(company: str) -> bool:
     norm = (company or "").lower().strip()
     return norm in HIGH_IMPACT_COMPANIES or any(h in norm for h in HIGH_IMPACT_COMPANIES)
@@ -162,6 +172,9 @@ def enrich_job(job: dict) -> dict[str, Any]:
 
     apply_type = detect_apply_type(apply_url)
     new_tags: list[str] = []
+
+    if detect_workday(apply_url):
+        new_tags.append("workday")
 
     if apply_type == "js_required":
         return {"apply_type": "js_required", "enrichment_status": "js_required", "new_tags": new_tags}

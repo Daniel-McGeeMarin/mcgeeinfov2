@@ -120,7 +120,7 @@ Analyze the GitHub README content provided and output ONLY a JSON object matchin
 }
 
 Universal keys for column_mapping: company, role, location, apply_url, date_posted
-Valid tag_ids: no_sponsorship, us_citizenship_required, closed, faang_plus, advanced_degree
+Valid tag_ids: no_sponsorship, us_citizenship_required, closed, high_impact, advanced_degree, fast_apply, workday, remote
 Valid row_type values: summer, new_grad, offseason
 
 Reference mapping (vanshb03/Summer2027-Internships):

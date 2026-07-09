@@ -11,9 +11,9 @@ TAG_CATALOG: dict[str, dict[str, str]] = {
     "no_sponsorship":        {"label": "Does NOT offer sponsorship",          "emoji": "🛂"},
     "us_citizenship_required": {"label": "Requires U.S. citizenship",         "emoji": "🇺🇸"},
     "closed":                {"label": "Application closed",                  "emoji": "🔒"},
-    "faang_plus":            {"label": "FAANG+",                              "emoji": "🔥"},
     "advanced_degree":       {"label": "Advanced degree required",            "emoji": "🎓"},
     "fast_apply":            {"label": "Fast apply (Simplify/Lever/GH)",      "emoji": "⚡"},
+    "workday":               {"label": "Workday ATS",                         "emoji": "🏢"},
     "high_impact":           {"label": "High-impact company",                 "emoji": "⭐"},
     "remote":                {"label": "Remote",                              "emoji": "🌐"},
 }
@@ -101,19 +101,51 @@ STANDARD_ATS_DOMAINS: frozenset[str] = frozenset({
 HIGH_IMPACT_COMPANIES: frozenset[str] = frozenset({
     # FAANG+
     "apple", "google", "alphabet", "meta", "amazon", "netflix", "microsoft",
-    # Quant / HFT
-    "jane street", "citadel", "hudson river trading", "hrt", "two sigma",
-    "drw", "optiver", "jump trading", "virtu", "akuna capital", "de shaw",
-    "tower research", "imc trading", "sig", "susquehanna",
-    # Top tech / AI
+    # Quant / HFT — comprehensive list
+    "jane street", "citadel", "citadel securities",
+    "hudson river trading", "hrt",
+    "two sigma", "de shaw", "d.e. shaw",
+    "drw", "optiver", "jump trading", "virtu", "virtu financial",
+    "akuna capital", "tower research", "tower research capital",
+    "imc trading", "sig", "susquehanna", "susquehanna international group",
+    "radix trading", "wolverine trading", "belvedere trading",
+    "chicago trading", "chicago trading company", "ctc",
+    "squarepoint", "squarepoint capital",
+    "pdt partners", "five rings", "five rings capital",
+    "millennium management", "millennium", "point72",
+    "renaissance technologies", "rentec", "rief",
+    "worldquant", "g-research", "g research",
+    "man group", "man ahl", "man numeric",
+    "arrowstreet", "arrowstreet capital",
+    "aqr", "aqr capital",
+    "quantlab", "tibra", "flow traders",
+    # Top enterprise tech
     "nvidia", "amd", "intel", "qualcomm", "arm",
+    "broadcom", "marvell", "micron", "applied materials", "lam research",
+    "texas instruments", "analog devices", "asml",
+    "salesforce", "adobe", "oracle", "sap", "servicenow", "workday",
+    "crowdstrike", "palo alto networks", "okta", "zscaler",
+    "datadog", "cloudflare", "fastly", "hashicorp", "confluent",
+    "mongodb", "elastic", "twilio",
+    # AI / ML
     "openai", "anthropic", "deepmind", "xai", "mistral",
+    "cohere", "scale ai", "hugging face", "stability ai",
+    "runway", "character.ai", "inflection", "perplexity",
+    "together ai", "groq", "cerebras",
+    # Top SaaS / cloud
     "stripe", "snowflake", "databricks", "palantir", "figma", "notion",
-    "vercel", "datadog", "cloudflare", "fastly", "hashicorp",
+    "vercel", "linear", "retool", "rippling", "ramp", "gusto",
+    # Defense / aerospace tech
+    "anduril", "spacex", "shield ai",
+    # Autonomy
+    "waymo", "applied intuition", "aurora", "nuro",
     # Consumer tech
     "uber", "lyft", "airbnb", "doordash", "instacart", "pinterest",
     "tiktok", "bytedance", "snap", "spotify",
+    "tesla", "rivian",
     # Fintech / finance
     "coinbase", "robinhood", "plaid", "brex", "chime", "affirm",
+    "block", "square", "paypal", "visa", "mastercard",
     "bloomberg", "goldman sachs", "morgan stanley", "jpmorgan", "jp morgan",
+    "capital one", "fidelity", "blackrock",
 })

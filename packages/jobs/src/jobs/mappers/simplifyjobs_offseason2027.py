@@ -18,7 +18,7 @@ _EMOJI_TO_TAG: dict[str, str] = {
     "🛂": "no_sponsorship",
     "🇺🇸": "us_citizenship_required",
     "🔒": "closed",
-    "🔥": "faang_plus",
+    "🔥": "high_impact",
     "🎓": "advanced_degree",
 }
 

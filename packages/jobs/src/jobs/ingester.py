@@ -5,7 +5,21 @@ Mappers are pre-registered (no runtime CRUD); just run and refresh.
 from __future__ import annotations
 
 from .db import DB
+from .enrichment import detect_apply_type, detect_workday
 from .mappers import MAPPER_BY_ID, MAPPERS
+
+
+def _apply_url_tags(row: dict) -> dict:
+    """Tag fast_apply and workday from the URL at ingest time — no network needed."""
+    url = row.get("apply_url") or ""
+    tags: list[str] = list(row.get("tags") or [])
+    apply_type = detect_apply_type(url)
+    if apply_type == "fast_apply" and "fast_apply" not in tags:
+        tags.append("fast_apply")
+    if detect_workday(url) and "workday" not in tags:
+        tags.append("workday")
+    row["tags"] = tags
+    return row
 
 
 class Ingester:
@@ -30,7 +44,7 @@ class Ingester:
     def _run_mapper(self, mapper) -> int:
         rows = mapper.run()
         for row in rows:
-            self._db.upsert_job(row)
+            self._db.upsert_job(_apply_url_tags(row))
         self._db.set_ingester_last_run(mapper.SOURCE_ID)
         return len(rows)
 

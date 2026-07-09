@@ -48,15 +48,15 @@ const TAG_META = {
   no_sponsorship:          { label: 'No Sponsorship', color: 'bg-red-900/60 text-red-300' },
   us_citizenship_required: { label: 'US Citizen',     color: 'bg-orange-900/60 text-orange-300' },
   closed:                  { label: 'Closed',          color: 'bg-neutral-800 text-neutral-500' },
-  faang_plus:              { label: 'FAANG+',          color: 'bg-amber-900/60 text-amber-300' },
   advanced_degree:         { label: 'Grad Degree',     color: 'bg-purple-900/60 text-purple-300' },
   fast_apply:              { label: '⚡ Fast Apply',    color: 'bg-emerald-900/60 text-emerald-300' },
+  workday:                 { label: 'Workday',          color: 'bg-sky-900/60 text-sky-400' },
   high_impact:             { label: '⭐ High Impact',   color: 'bg-blue-900/60 text-blue-300' },
   remote:                  { label: 'Remote',           color: 'bg-teal-900/60 text-teal-300' },
 }
 
 const FILTERABLE_TAGS = [
-  'fast_apply', 'high_impact', 'faang_plus', 'remote',
+  'fast_apply', 'high_impact', 'remote', 'workday',
   'no_sponsorship', 'us_citizenship_required', 'advanced_degree', 'closed',
 ]
 

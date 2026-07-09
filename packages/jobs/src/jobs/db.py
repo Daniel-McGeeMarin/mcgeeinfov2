@@ -19,6 +19,35 @@ class DB:
         self._conn.row_factory = sqlite3.Row
         self._conn.execute("PRAGMA journal_mode=WAL")
         self._init_schema()
+        self._run_migrations()
+
+    def _run_migrations(self) -> None:
+        self._conn.execute("""
+            CREATE TABLE IF NOT EXISTS schema_migrations (
+                name TEXT PRIMARY KEY,
+                applied_at TEXT
+            )
+        """)
+        self._conn.commit()
+        applied = {r[0] for r in self._conn.execute("SELECT name FROM schema_migrations").fetchall()}
+
+        if "rename_faang_to_high_impact" not in applied:
+            rows = self._conn.execute("SELECT id, tags FROM jobs WHERE tags LIKE '%faang_plus%'").fetchall()
+            for row_id, tags_json in rows:
+                try:
+                    tags = json.loads(tags_json or "[]")
+                    tags = [t for t in tags if t != "faang_plus"]
+                    if "high_impact" not in tags:
+                        tags.append("high_impact")
+                    tags.sort()
+                    self._conn.execute("UPDATE jobs SET tags=? WHERE id=?", (json.dumps(tags), row_id))
+                except Exception:
+                    pass
+            self._conn.execute(
+                "INSERT INTO schema_migrations (name, applied_at) VALUES (?, ?)",
+                ("rename_faang_to_high_impact", _now()),
+            )
+            self._conn.commit()
 
     def _init_schema(self) -> None:
         self._conn.executescript("""

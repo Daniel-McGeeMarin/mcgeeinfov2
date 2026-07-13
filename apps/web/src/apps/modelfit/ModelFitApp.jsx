@@ -253,8 +253,38 @@ export default function ModelFitApp() {
         {/* Right panel */}
         <div className={`w-80 shrink-0 border-l ${panelBg} flex flex-col overflow-y-auto`}>
           <div className="flex-1 p-4 flex flex-col gap-3">
-            <AnimatePresence mode="wait">
-              {submitted ? (
+            {/* Model panels stay mounted so math-field state is preserved across Try Again */}
+            <div className={`flex flex-col gap-3 ${submitted ? 'hidden' : ''}`}>
+              <p className={`text-xs px-1 ${isDark ? 'text-neutral-600' : 'text-neutral-500'}`}>
+                Adjust each equation to fit the white data points. Toggle curves with the eye icon.
+              </p>
+              {['linear', 'quadratic', 'exponential'].map((type) => (
+                <ModelPanel
+                  key={type}
+                  type={type}
+                  model={session.models[type]}
+                  onExprChange={updateExpr}
+                  onToggleVisibility={toggleVisibility}
+                  disabled={false}
+                  theme={theme}
+                />
+              ))}
+              {scoreError && (
+                <p className="text-xs text-red-400 px-1">{scoreError}</p>
+              )}
+              <button
+                onClick={handleCheckFit}
+                disabled={scoring}
+                className="mt-2 w-full flex items-center justify-center gap-2 rounded-xl bg-neutral-100 py-3 text-sm font-semibold text-neutral-950 hover:bg-white transition-colors disabled:opacity-60"
+              >
+                {scoring && <Loader2 size={14} className="animate-spin" />}
+                Check My Fit →
+              </button>
+            </div>
+
+            {/* Score reveal animates in/out independently */}
+            <AnimatePresence>
+              {submitted && (
                 <motion.div
                   key="reveal"
                   initial={{ opacity: 0 }}
@@ -267,40 +297,6 @@ export default function ModelFitApp() {
                     onReset={resetScores}
                     onShare={() => setSubmitOpen(true)}
                   />
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="panels"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="flex flex-col gap-3"
-                >
-                  <p className={`text-xs px-1 ${isDark ? 'text-neutral-600' : 'text-neutral-500'}`}>
-                    Adjust each equation to fit the white data points. Toggle curves with the eye icon.
-                  </p>
-                  {['linear', 'quadratic', 'exponential'].map((type) => (
-                    <ModelPanel
-                      key={type}
-                      type={type}
-                      model={session.models[type]}
-                      onExprChange={updateExpr}
-                      onToggleVisibility={toggleVisibility}
-                      disabled={false}
-                      theme={theme}
-                    />
-                  ))}
-                  {scoreError && (
-                    <p className="text-xs text-red-400 px-1">{scoreError}</p>
-                  )}
-                  <button
-                    onClick={handleCheckFit}
-                    disabled={scoring}
-                    className="mt-2 w-full flex items-center justify-center gap-2 rounded-xl bg-neutral-100 py-3 text-sm font-semibold text-neutral-950 hover:bg-white transition-colors disabled:opacity-60"
-                  >
-                    {scoring && <Loader2 size={14} className="animate-spin" />}
-                    Check My Fit →
-                  </button>
                 </motion.div>
               )}
             </AnimatePresence>

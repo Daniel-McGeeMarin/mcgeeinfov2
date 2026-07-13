@@ -35,6 +35,13 @@ export const about = {
 // Portfolio page. `status: "soon"` renders as non-clickable.
 export const webApps = [
   {
+    name: "Model Fitter",
+    description: "Fit linear, quadratic, and exponential models to real datasets by typing live equations — see which generalises best to hidden test data.",
+    tags: ["Math", "Education", "Interactive"],
+    status: "live",
+    href: "/apps/modelfit",
+  },
+  {
     name: "Poker Odds Simulator",
     description: "Monte Carlo hand-equity simulator — see how your odds shift street by street.",
     tags: ["Python", "Monte Carlo"],

@@ -8,6 +8,7 @@ import PokerTable from './pages/PokerTable'
 import SessionTimer from './pages/SessionTimer'
 import Jobs from './pages/Jobs'
 import JobQueue from './pages/JobQueue'
+import ModelFitApp from './apps/modelfit/ModelFitApp'
 
 function AnimatedRoutes() {
   const location = useLocation()
@@ -29,12 +30,23 @@ function AnimatedRoutes() {
 export default function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-neutral-950 text-neutral-100">
-        <Sidebar />
-        <main className="pt-14 lg:pt-0 lg:pl-64">
-          <AnimatedRoutes />
-        </main>
-      </div>
+      <Routes>
+        {/* Fullscreen — no sidebar or site chrome */}
+        <Route path="/apps/modelfit" element={<ModelFitApp />} />
+
+        {/* Everything else gets the sidebar layout */}
+        <Route
+          path="*"
+          element={
+            <div className="min-h-screen bg-neutral-950 text-neutral-100">
+              <Sidebar />
+              <main className="pt-14 lg:pt-0 lg:pl-64">
+                <AnimatedRoutes />
+              </main>
+            </div>
+          }
+        />
+      </Routes>
     </BrowserRouter>
   )
 }

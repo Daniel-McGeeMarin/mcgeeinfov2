@@ -8,12 +8,14 @@ dependencies = [
     "poker",
     "resume",
     "jobs",
+    "modelfit",
 ]
 
 [tool.uv.sources]
-poker  = { workspace = true }
-resume = { workspace = true }
-jobs   = { workspace = true }
+poker     = { workspace = true }
+resume    = { workspace = true }
+jobs      = { workspace = true }
+modelfit  = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]

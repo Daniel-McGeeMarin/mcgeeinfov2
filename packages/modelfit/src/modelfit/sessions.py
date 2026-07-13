@@ -4,7 +4,7 @@ import sqlite3
 import uuid
 from pathlib import Path
 
-_DB_PATH = Path(os.environ.get("MODELFIT_DB", "/tmp/modelfit_sessions.db"))
+_DB_PATH = Path(os.environ.get("MODELFIT_DB", "./modelfit_sessions.db"))
 
 
 def _conn() -> sqlite3.Connection:

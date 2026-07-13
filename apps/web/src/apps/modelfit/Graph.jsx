@@ -73,16 +73,16 @@ export default function Graph({ trainPoints, testPoints, models, xDomain, yDomai
     ? {
         '--mafs-bg': '#09090b',
         '--mafs-fg': '#52525b',
-        '--grid-line-color': 'rgba(255,255,255,0.08)',
-        '--grid-line-subdivision-color': 'rgba(255,255,255,0.03)',
-        '--mafs-origin-color': 'rgba(255,255,255,0.18)',
+        '--mafs-line-color': '#3f3f46',
+        '--grid-line-subdivision-color': '#1a1a1d',
+        '--mafs-origin-color': '#52525b',
       }
     : {
         '--mafs-bg': '#f8fafc',
-        '--mafs-fg': '#6b7280',
-        '--grid-line-color': 'rgba(0,0,0,0.10)',
-        '--grid-line-subdivision-color': 'rgba(0,0,0,0.04)',
-        '--mafs-origin-color': 'rgba(0,0,0,0.22)',
+        '--mafs-fg': '#374151',
+        '--mafs-line-color': '#d1d5db',
+        '--grid-line-subdivision-color': '#e5e7eb',
+        '--mafs-origin-color': '#6b7280',
       }
 
   return (

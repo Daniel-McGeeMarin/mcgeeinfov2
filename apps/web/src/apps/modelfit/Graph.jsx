@@ -69,24 +69,8 @@ export default function Graph({ trainPoints, testPoints, models, xDomain, yDomai
   const strokeW = boldMode ? 4 : 2
   const isDark = theme !== 'light'
 
-  const cssVars = isDark
-    ? {
-        '--mafs-bg': '#09090b',
-        '--mafs-fg': '#52525b',
-        '--mafs-line-color': '#3f3f46',
-        '--grid-line-subdivision-color': '#1a1a1d',
-        '--mafs-origin-color': '#52525b',
-      }
-    : {
-        '--mafs-bg': '#f8fafc',
-        '--mafs-fg': '#374151',
-        '--mafs-line-color': '#d1d5db',
-        '--grid-line-subdivision-color': '#e5e7eb',
-        '--mafs-origin-color': '#6b7280',
-      }
-
   return (
-    <div ref={containerRef} className="w-full h-full" style={cssVars}>
+    <div ref={containerRef} className="w-full h-full" data-mf-theme={isDark ? 'dark' : 'light'}>
       <Mafs
         viewBox={viewBox}
         preserveAspectRatio={false}

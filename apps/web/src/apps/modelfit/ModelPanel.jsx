@@ -121,6 +121,7 @@ export default function ModelPanel({ type, model, onExprChange, onToggleVisibili
               width: '100%',
               padding: '4px 10px',
               fontSize: '14px',
+              colorScheme: isDark ? 'dark' : 'light',
               color: isDark ? '#f5f5f5' : '#171717',
               background: isDark ? '#18181b' : '#f9f9f9',
               '--keyboard-background': isDark ? '#262626' : '#f0f0f0',

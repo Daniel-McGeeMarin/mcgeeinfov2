@@ -11,3 +11,22 @@
     @apply antialiased;
   }
 }
+
+/* Mafs sets its own CSS vars on .MafsView, so a parent's inline style vars are ignored
+   (inherited values lose to the element's own CSS rule). Use higher-specificity selectors
+   here to override both dark and light defaults. */
+[data-mf-theme="dark"] .MafsView {
+  --mafs-bg: #09090b;
+  --mafs-fg: #52525b;
+  --mafs-line-color: #3f3f46;
+  --grid-line-subdivision-color: #1a1a1d;
+  --mafs-origin-color: #52525b;
+}
+
+[data-mf-theme="light"] .MafsView {
+  --mafs-bg: #f8fafc;
+  --mafs-fg: #374151;
+  --mafs-line-color: #d1d5db;
+  --grid-line-subdivision-color: #e5e7eb;
+  --mafs-origin-color: #6b7280;
+}

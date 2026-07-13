@@ -76,5 +76,16 @@ export function useFitSession(challengeId) {
     setSession(s => ({ ...freshState(challengeId), tutorialDone: s.tutorialDone }))
   }, [challengeId])
 
-  return { session, updateExpr, toggleVisibility, markTutorialDone, setScoreResult, setSessionId, reset }
+  const resetScores = useCallback(() => {
+    setSession(s => ({
+      ...s,
+      submitted: false,
+      scores: null,
+      testPoints: null,
+      bestModel: null,
+      sessionId: null,
+    }))
+  }, [])
+
+  return { session, updateExpr, toggleVisibility, markTutorialDone, setScoreResult, setSessionId, reset, resetScores }
 }

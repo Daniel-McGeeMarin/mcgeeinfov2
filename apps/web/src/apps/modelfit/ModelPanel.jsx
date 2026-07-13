@@ -1,22 +1,20 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
 import { compile } from 'mathjs'
 import { MODEL_COLORS } from './useFitSession'
+import 'mathlive'
 
 const CONFIG = {
   linear: {
     label: 'Linear',
-    placeholder: 'e.g. 2*x + 3',
     description: 'A straight line: y = ax + b',
   },
   quadratic: {
     label: 'Quadratic',
-    placeholder: 'e.g. 0.5*x^2 - x + 1',
     description: 'A parabola: y = ax² + bx + c',
   },
   exponential: {
     label: 'Exponential',
-    placeholder: 'e.g. 3*e^(0.2*x)',
     description: 'Exponential growth/decay: y = a·eˢˣ',
   },
 }
@@ -32,26 +30,51 @@ function validate(expr) {
   }
 }
 
-export default function ModelPanel({ type, model, onExprChange, onToggleVisibility, disabled }) {
+export default function ModelPanel({ type, model, onExprChange, onToggleVisibility, disabled, theme }) {
   const cfg = CONFIG[type]
   const color = MODEL_COLORS[type]
   const [error, setError] = useState(false)
+  const mfRef = useRef(null)
+  const isDark = theme !== 'light'
 
+  // Set up input listener on mount
   useEffect(() => {
+    const mf = mfRef.current
+    if (!mf) return
+    mf.mathVirtualKeyboardPolicy = 'off'
+
+    const onInput = () => {
+      const val = mf.getValue('ascii-math')
+      onExprChange(type, val)
+      setError(!validate(val))
+    }
+
+    mf.addEventListener('input', onInput)
+    return () => mf.removeEventListener('input', onInput)
+  }, [type, onExprChange])
+
+  // Sync external value into math-field (challenge switch, localStorage load)
+  useEffect(() => {
+    const mf = mfRef.current
+    if (!mf) return
+    const cur = mf.getValue('ascii-math')
+    if (cur !== model.expr) {
+      mf.setValue(model.expr, { format: 'ascii-math' })
+    }
     setError(!validate(model.expr))
   }, [model.expr])
 
-  function handleChange(e) {
-    const val = e.target.value
-    onExprChange(type, val)
-    setError(!validate(val))
-  }
+  // Sync read-only state
+  useEffect(() => {
+    const mf = mfRef.current
+    if (mf) mf.readOnly = !!disabled
+  }, [disabled])
 
   return (
     <div
       className="rounded-xl border p-4 transition-colors"
       style={{
-        borderColor: model.visible ? `${color}33` : '#27272a',
+        borderColor: model.visible ? `${color}33` : (isDark ? '#27272a' : '#e5e5e5'),
         backgroundColor: model.visible ? `${color}08` : 'transparent',
       }}
     >
@@ -59,40 +82,51 @@ export default function ModelPanel({ type, model, onExprChange, onToggleVisibili
         <div className="flex items-center gap-2">
           <span
             className="w-2.5 h-2.5 rounded-full"
-            style={{ backgroundColor: model.visible ? color : '#52525b' }}
+            style={{ backgroundColor: model.visible ? color : (isDark ? '#52525b' : '#a3a3a3') }}
           />
-          <span className="text-sm font-semibold text-neutral-200">{cfg.label}</span>
+          <span className={`text-sm font-semibold ${isDark ? 'text-neutral-200' : 'text-neutral-800'}`}>
+            {cfg.label}
+          </span>
         </div>
         <button
           onClick={() => onToggleVisibility(type)}
           disabled={disabled}
-          className="text-neutral-500 hover:text-neutral-300 transition-colors disabled:opacity-40"
+          className={`transition-colors disabled:opacity-40 ${
+            isDark ? 'text-neutral-500 hover:text-neutral-300' : 'text-neutral-400 hover:text-neutral-700'
+          }`}
           title={model.visible ? 'Hide curve' : 'Show curve'}
         >
           {model.visible ? <Eye size={15} /> : <EyeOff size={15} />}
         </button>
       </div>
 
-      <p className="text-xs text-neutral-600 mb-2">{cfg.description}</p>
+      <p className={`text-xs mb-2 ${isDark ? 'text-neutral-600' : 'text-neutral-500'}`}>
+        {cfg.description}
+      </p>
 
       <div className="flex items-center gap-2">
-        <span className="text-sm text-neutral-500 font-mono shrink-0">y =</span>
-        <input
-          type="text"
-          value={model.expr}
-          onChange={handleChange}
-          disabled={disabled}
-          placeholder={cfg.placeholder}
-          spellCheck={false}
-          className={[
-            'flex-1 bg-neutral-900 rounded-lg px-3 py-2 text-sm font-mono outline-none transition-colors',
-            'placeholder:text-neutral-700 text-neutral-100',
-            'disabled:opacity-50 disabled:cursor-not-allowed',
+        <span className="text-sm font-mono shrink-0 text-neutral-500">y =</span>
+        <div
+          className={`flex-1 rounded-lg border overflow-hidden ${
             error && model.expr.trim()
-              ? 'border border-red-500/60 focus:border-red-500'
-              : 'border border-neutral-800 focus:border-neutral-600',
-          ].join(' ')}
-        />
+              ? 'border-red-500/60'
+              : isDark ? 'border-neutral-800' : 'border-neutral-300'
+          }`}
+        >
+          {/* eslint-disable-next-line react/no-unknown-property */}
+          <math-field
+            ref={mfRef}
+            style={{
+              display: 'block',
+              width: '100%',
+              padding: '4px 10px',
+              fontSize: '14px',
+              background: isDark ? '#18181b' : '#f9f9f9',
+              '--math-font-color': isDark ? '#f5f5f5' : '#171717',
+              '--keyboard-background': isDark ? '#262626' : '#f0f0f0',
+            }}
+          />
+        </div>
       </div>
 
       {error && model.expr.trim() && (

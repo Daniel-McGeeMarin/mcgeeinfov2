@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowLeft, ChevronDown, Loader2, RotateCcw } from 'lucide-react'
+import { ArrowLeft, Bold, ChevronDown, Loader2, Moon, RotateCcw, Sun } from 'lucide-react'
 import { compile } from 'mathjs'
 
 import Graph from './Graph'
@@ -32,6 +32,8 @@ export default function ModelFitApp() {
   const [challengeId, setChallengeId] = useState(challengeParam)
   const [challenge, setChallenge] = useState(null)
   const [loadError, setLoadError] = useState(null)
+  const [theme, setTheme] = useState('dark')
+  const [boldMode, setBoldMode] = useState(false)
 
   const [professorData, setProfessorData] = useState(null)
   const [checkingOut, setCheckingOut] = useState(false)
@@ -40,8 +42,10 @@ export default function ModelFitApp() {
   const [scoreError, setScoreError] = useState(null)
   const [challengeMenuOpen, setChallengeMenuOpen] = useState(false)
 
-  const { session, updateExpr, toggleVisibility, markTutorialDone, setScoreResult, setSessionId, reset } =
+  const { session, updateExpr, toggleVisibility, markTutorialDone, setScoreResult, setSessionId, resetScores } =
     useFitSession(challengeId)
+
+  const isDark = theme === 'dark'
 
   // Load challenge data
   useEffect(() => {
@@ -86,10 +90,7 @@ export default function ModelFitApp() {
       const predictions = {}
       for (const type of ['linear', 'quadratic', 'exponential']) {
         const expr = session.models[type].expr
-        predictions[type] = challenge.test_x.map((x) => {
-          const v = evalAt(expr, x)
-          return v ?? 0
-        })
+        predictions[type] = challenge.test_x.map((x) => evalAt(expr, x) ?? 0)
       }
       const result = await scoreModels(challengeId, predictions)
       setScoreResult(result.scores, result.test_points, result.best_model)
@@ -105,38 +106,51 @@ export default function ModelFitApp() {
   const activeSession = isProfessor ? professorData?.state : session
   const submitted = isProfessor || session.submitted
 
+  // --- theme-aware classes ---
+  const rootBg = isDark ? 'bg-neutral-950 text-neutral-100' : 'bg-neutral-50 text-neutral-900'
+  const headerBg = isDark
+    ? 'border-neutral-900 bg-neutral-950/90'
+    : 'border-neutral-200 bg-neutral-50/90'
+  const panelBg = isDark
+    ? 'border-neutral-900 bg-neutral-950'
+    : 'border-neutral-200 bg-white'
+  const descBg = isDark
+    ? 'border-neutral-800/60 bg-neutral-950/80'
+    : 'border-neutral-200/60 bg-white/80'
+  const descText = isDark ? 'text-neutral-500' : 'text-neutral-500'
+
   if (checkingOut || (!challenge && !loadError)) {
     return (
-      <div className="fixed inset-0 bg-neutral-950 flex items-center justify-center">
-        <Loader2 size={28} className="animate-spin text-neutral-600" />
+      <div className={`fixed inset-0 ${rootBg} flex items-center justify-center`}>
+        <Loader2 size={28} className="animate-spin text-neutral-500" />
       </div>
     )
   }
 
   if (loadError) {
     return (
-      <div className="fixed inset-0 bg-neutral-950 flex flex-col items-center justify-center gap-4">
+      <div className={`fixed inset-0 ${rootBg} flex flex-col items-center justify-center gap-4`}>
         <p className="text-neutral-400 text-sm">{loadError}</p>
-        <Link to="/" className="text-xs text-neutral-600 hover:text-neutral-400 underline">← Back to site</Link>
+        <Link to="/" className="text-xs text-neutral-500 hover:text-neutral-400 underline">← Back to site</Link>
       </div>
     )
   }
 
   return (
-    <div className="fixed inset-0 bg-neutral-950 flex flex-col overflow-hidden">
+    <div className={`fixed inset-0 ${rootBg} flex flex-col overflow-hidden`}>
 
       {/* Header */}
-      <header className="shrink-0 flex items-center justify-between px-4 py-2.5 border-b border-neutral-900 bg-neutral-950/90 backdrop-blur z-10">
+      <header className={`shrink-0 flex items-center justify-between px-4 py-2.5 border-b ${headerBg} backdrop-blur z-10`}>
         <Link
           to="/"
-          className="flex items-center gap-1.5 text-xs text-neutral-500 hover:text-neutral-300 transition-colors"
+          className={`flex items-center gap-1.5 text-xs transition-colors ${isDark ? 'text-neutral-500 hover:text-neutral-300' : 'text-neutral-500 hover:text-neutral-700'}`}
         >
           <ArrowLeft size={13} /> Back
         </Link>
 
         <div className="flex items-center gap-1">
           {isProfessor ? (
-            <span className="text-sm font-semibold text-neutral-200">
+            <span className={`text-sm font-semibold ${isDark ? 'text-neutral-200' : 'text-neutral-800'}`}>
               {professorData?.student_name
                 ? `${professorData.student_name}'s results`
                 : 'Student results'}
@@ -145,19 +159,21 @@ export default function ModelFitApp() {
             <div className="relative">
               <button
                 onClick={() => setChallengeMenuOpen(o => !o)}
-                className="flex items-center gap-1.5 text-sm font-semibold text-neutral-200 hover:text-white transition-colors"
+                className={`flex items-center gap-1.5 text-sm font-semibold transition-colors ${isDark ? 'text-neutral-200 hover:text-white' : 'text-neutral-800 hover:text-black'}`}
               >
                 {CHALLENGE_LABELS[challengeId]}
                 <ChevronDown size={14} className={`transition-transform ${challengeMenuOpen ? 'rotate-180' : ''}`} />
               </button>
               {challengeMenuOpen && (
-                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-44 rounded-xl border border-neutral-800 bg-neutral-950 shadow-2xl overflow-hidden z-50">
+                <div className={`absolute top-full left-1/2 -translate-x-1/2 mt-2 w-44 rounded-xl border shadow-2xl overflow-hidden z-50 ${isDark ? 'border-neutral-800 bg-neutral-950' : 'border-neutral-200 bg-white'}`}>
                   {CHALLENGE_IDS.map((id) => (
                     <button
                       key={id}
                       onClick={() => switchChallenge(id)}
-                      className={`w-full px-4 py-2.5 text-left text-sm transition-colors hover:bg-neutral-800 ${
-                        id === challengeId ? 'text-neutral-100 font-medium' : 'text-neutral-400'
+                      className={`w-full px-4 py-2.5 text-left text-sm transition-colors ${isDark ? 'hover:bg-neutral-800' : 'hover:bg-neutral-100'} ${
+                        id === challengeId
+                          ? isDark ? 'text-neutral-100 font-medium' : 'text-neutral-900 font-medium'
+                          : isDark ? 'text-neutral-400' : 'text-neutral-500'
                       }`}
                     >
                       {CHALLENGE_LABELS[id]}
@@ -169,12 +185,34 @@ export default function ModelFitApp() {
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
+          {/* Bold mode toggle */}
+          <button
+            onClick={() => setBoldMode(b => !b)}
+            title="Bold mode — thicker curves and larger points"
+            className={`rounded-md p-1.5 transition-colors ${
+              boldMode
+                ? 'bg-neutral-700 text-white'
+                : isDark ? 'text-neutral-500 hover:text-neutral-300' : 'text-neutral-400 hover:text-neutral-700'
+            }`}
+          >
+            <Bold size={14} />
+          </button>
+
+          {/* Theme toggle */}
+          <button
+            onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
+            title={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
+            className={`rounded-md p-1.5 transition-colors ${isDark ? 'text-neutral-500 hover:text-neutral-300' : 'text-neutral-400 hover:text-neutral-700'}`}
+          >
+            {isDark ? <Sun size={14} /> : <Moon size={14} />}
+          </button>
+
           {!isProfessor && !session.submitted && (
             <button
               onClick={handleCheckFit}
               disabled={scoring}
-              className="flex items-center gap-1.5 rounded-full bg-neutral-100 px-4 py-1.5 text-xs font-semibold text-neutral-950 hover:bg-white transition-colors disabled:opacity-60"
+              className="ml-1 flex items-center gap-1.5 rounded-full bg-neutral-100 px-4 py-1.5 text-xs font-semibold text-neutral-950 hover:bg-white transition-colors disabled:opacity-60"
             >
               {scoring && <Loader2 size={12} className="animate-spin" />}
               Check My Fit →
@@ -182,10 +220,10 @@ export default function ModelFitApp() {
           )}
           {!isProfessor && session.submitted && (
             <button
-              onClick={reset}
-              className="flex items-center gap-1 text-xs text-neutral-500 hover:text-neutral-300 transition-colors"
+              onClick={resetScores}
+              className={`ml-1 flex items-center gap-1 text-xs transition-colors ${isDark ? 'text-neutral-500 hover:text-neutral-300' : 'text-neutral-500 hover:text-neutral-700'}`}
             >
-              <RotateCcw size={12} /> Reset
+              <RotateCcw size={12} /> Try again
             </button>
           )}
         </div>
@@ -203,16 +241,17 @@ export default function ModelFitApp() {
               models={activeModels ?? session.models}
               xDomain={challenge.x_domain}
               yDomain={challenge.y_domain}
+              boldMode={boldMode}
+              theme={theme}
             />
           )}
-          {/* Challenge description */}
-          <div className="absolute bottom-3 left-3 rounded-lg border border-neutral-800/60 bg-neutral-950/80 backdrop-blur px-3 py-2 max-w-xs">
-            <p className="text-xs text-neutral-500 leading-relaxed">{challenge?.description}</p>
+          <div className={`absolute bottom-3 left-3 rounded-lg border ${descBg} backdrop-blur px-3 py-2 max-w-xs`}>
+            <p className={`text-xs ${descText} leading-relaxed`}>{challenge?.description}</p>
           </div>
         </div>
 
         {/* Right panel */}
-        <div className="w-80 shrink-0 border-l border-neutral-900 flex flex-col overflow-y-auto bg-neutral-950">
+        <div className={`w-80 shrink-0 border-l ${panelBg} flex flex-col overflow-y-auto`}>
           <div className="flex-1 p-4 flex flex-col gap-3">
             <AnimatePresence mode="wait">
               {submitted ? (
@@ -225,7 +264,7 @@ export default function ModelFitApp() {
                   <ScoreReveal
                     scores={activeSession?.scores}
                     bestModel={activeSession?.bestModel}
-                    onReset={reset}
+                    onReset={resetScores}
                     onShare={() => setSubmitOpen(true)}
                   />
                 </motion.div>
@@ -237,7 +276,7 @@ export default function ModelFitApp() {
                   exit={{ opacity: 0 }}
                   className="flex flex-col gap-3"
                 >
-                  <p className="text-xs text-neutral-600 px-1">
+                  <p className={`text-xs px-1 ${isDark ? 'text-neutral-600' : 'text-neutral-500'}`}>
                     Adjust each equation to fit the white data points. Toggle curves with the eye icon.
                   </p>
                   {['linear', 'quadratic', 'exponential'].map((type) => (
@@ -248,6 +287,7 @@ export default function ModelFitApp() {
                       onExprChange={updateExpr}
                       onToggleVisibility={toggleVisibility}
                       disabled={false}
+                      theme={theme}
                     />
                   ))}
                   {scoreError && (

@@ -11,7 +11,7 @@ export default function ResumeEdit() {
 
   useEffect(() => {
     fetch('/api/resume/default')
-      .then(r => r.text())
+      .then(r => { if (!r.ok) throw new Error(`API unavailable (${r.status})`); return r.text() })
       .then(text => { setYaml(text); generate(text) })
       .catch(e => setError(e.message))
   }, [])

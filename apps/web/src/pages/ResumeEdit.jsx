@@ -1,30 +1,32 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Download, RefreshCw } from 'lucide-react'
-import { renderAsync } from 'docx-preview'
+import { Download, RefreshCw, FileText } from 'lucide-react'
 
 export default function ResumeEdit() {
   const [yaml, setYaml] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const [blob, setBlob] = useState(null)
-  const previewRef = useRef(null)
+  const [pdfUrl, setPdfUrl] = useState(null)
+  const prevPdfUrl = useRef(null)
 
   useEffect(() => {
     fetch('/api/resume/default')
       .then(r => r.text())
-      .then(text => {
-        setYaml(text)
-        buildDoc(text)
-      })
+      .then(text => { setYaml(text); generate(text) })
       .catch(e => setError(e.message))
   }, [])
 
-  async function buildDoc(yamlText) {
+  // Revoke old blob URL when a new one is set
+  useEffect(() => {
+    if (prevPdfUrl.current) URL.revokeObjectURL(prevPdfUrl.current)
+    prevPdfUrl.current = pdfUrl
+  }, [pdfUrl])
+
+  async function generate(yamlText) {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch('/api/resume/build', {
+      const res = await fetch('/api/resume/preview', {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain' },
         body: yamlText,
@@ -33,17 +35,8 @@ export default function ResumeEdit() {
         const body = await res.json().catch(() => null)
         throw new Error(body?.detail ?? `Request failed (${res.status})`)
       }
-      const docxBlob = await res.blob()
-      setBlob(docxBlob)
-      if (previewRef.current) {
-        previewRef.current.innerHTML = ''
-        await renderAsync(docxBlob, previewRef.current, null, {
-          className: 'docx-preview',
-          inWrapper: true,
-          ignoreWidth: false,
-          ignoreHeight: false,
-        })
-      }
+      const blob = await res.blob()
+      setPdfUrl(URL.createObjectURL(blob))
     } catch (e) {
       setError(e.message)
     } finally {
@@ -51,14 +44,28 @@ export default function ResumeEdit() {
     }
   }
 
-  function download() {
-    if (!blob) return
-    const url = URL.createObjectURL(blob)
+  async function downloadDocx() {
+    try {
+      const res = await fetch('/api/resume/build', {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: yaml,
+      })
+      if (!res.ok) throw new Error(`Request failed (${res.status})`)
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url; a.download = 'resume.docx'; a.click()
+      URL.revokeObjectURL(url)
+    } catch (e) {
+      setError(e.message)
+    }
+  }
+
+  function downloadPdf() {
+    if (!pdfUrl) return
     const a = document.createElement('a')
-    a.href = url
-    a.download = 'resume.docx'
-    a.click()
-    URL.revokeObjectURL(url)
+    a.href = pdfUrl; a.download = 'resume.pdf'; a.click()
   }
 
   return (
@@ -73,20 +80,28 @@ export default function ResumeEdit() {
         <h1 className="text-lg font-semibold text-neutral-100">Resume Builder</h1>
         <div className="flex gap-2">
           <button
-            onClick={() => buildDoc(yaml)}
+            onClick={() => generate(yaml)}
             disabled={loading}
             className="flex items-center gap-2 rounded-full bg-neutral-700 px-4 py-1.5 text-sm font-medium text-neutral-100 transition hover:bg-neutral-600 disabled:opacity-50"
           >
             <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-            Generate
+            {loading ? 'Generating…' : 'Generate'}
           </button>
           <button
-            onClick={download}
-            disabled={!blob}
+            onClick={downloadPdf}
+            disabled={!pdfUrl}
+            className="flex items-center gap-2 rounded-full bg-neutral-700 px-4 py-1.5 text-sm font-medium text-neutral-100 transition hover:bg-neutral-600 disabled:opacity-40"
+          >
+            <Download size={14} />
+            .pdf
+          </button>
+          <button
+            onClick={downloadDocx}
+            disabled={loading}
             className="flex items-center gap-2 rounded-full bg-amber-400 px-4 py-1.5 text-sm font-semibold text-neutral-950 transition hover:bg-amber-300 disabled:opacity-40"
           >
-            <Download size={14} strokeWidth={2.5} />
-            Download .docx
+            <FileText size={14} strokeWidth={2.5} />
+            .docx
           </button>
         </div>
       </div>
@@ -106,13 +121,23 @@ export default function ResumeEdit() {
           )}
         </div>
 
-        <div className="flex-1 overflow-auto bg-neutral-200 p-6">
-          {loading && !blob && (
-            <div className="flex h-full items-center justify-center text-sm text-neutral-500">
-              Building…
+        <div className="relative flex-1 overflow-hidden bg-neutral-200">
+          {loading && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-neutral-200/80 text-sm text-neutral-500">
+              Converting via OnlyOffice…
             </div>
           )}
-          <div ref={previewRef} />
+          {pdfUrl ? (
+            <iframe
+              src={pdfUrl}
+              title="Resume preview"
+              className="h-full w-full border-0"
+            />
+          ) : !loading && (
+            <div className="flex h-full items-center justify-center text-sm text-neutral-500">
+              Click Generate to preview
+            </div>
+          )}
         </div>
       </div>
     </motion.div>

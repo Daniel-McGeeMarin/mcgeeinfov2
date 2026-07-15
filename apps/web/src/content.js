@@ -57,6 +57,13 @@ export const webApps = [
     href: "/apps/session-timer",
   },
   {
+    name: "Resume Builder",
+    description: "Edit resume data as YAML and generate a formatted .docx — add experience and project entries on the fly, preview inline, and download.",
+    tags: ["Python", "python-docx", "YAML"],
+    status: "live",
+    href: "/apps/resumedit",
+  },
+  {
     name: "Job Browser",
     description: "Private internship aggregator — pulls Summer 2027 listings from GitHub sources, deduplicates by canonical URL, enriches via page scraping, and tracks applications in a personal queue.",
     tags: ["Python", "SQLite", "FastAPI"],

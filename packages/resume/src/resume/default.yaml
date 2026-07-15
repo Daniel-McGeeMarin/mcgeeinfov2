@@ -1,0 +1,118 @@
+header:
+  name: Daniel McGee
+  phone: "859.445.1659"
+  email: mcgeedan@berkeley.edu
+  linkedin: linkedin.com/in/DanielMcGeeMarin
+
+education:
+  - institution: UC Berkeley
+    program: Management, Entrepreneurship, & Technology Program
+    graduation: May 2028
+    degree: B.S. EECS & Business Administration
+    gpa: "3.89 (3.92 Tech)"
+    coursework:
+      - label: EE
+        courses:
+          - {number: "126", name: Random Processes}
+          - {number: "16A/B", name: LinAlg}
+      - label: CS
+        courses:
+          - {number: "170", name: Algos}
+          - {number: "70", name: Prob}
+          - {number: "61A/B/C"}
+        expected:
+          - {number: "189", name: ML}
+          - {number: "127", name: Optimization}
+
+experience:
+  - role: "Software Engineer Intern (Simulation)"
+    company: Illumio
+    dates: Jun-Aug 2026
+    location: Sunnyvale, CA
+    bullets:
+      - Developing a sandboxed simulation engine to model network state transitions and evaluate microsegmentation logic against adversarial attacks, quantifying tail risk via thousands of simulated scenarios.
+
+  - role: Software Engineering Intern
+    company: "Farther (8B+ AUM)"
+    dates: Aug-Oct 2025
+    location: San Francisco, CA
+    bullets:
+      - Built automated pipelines to scrape, parse, and clean 2K unstructured corporate documents and 40K firm profiles.
+      - Developed an event driven model using alternative datasets to forecast institutional procurement cycles, building a scoring algorithm to rank corporations most likely to issue a Request for Proposal within the next month.
+
+  - role: ML Software Engineering Intern
+    company: GenPF
+    dates: Jun-Aug 2025
+    location: San Francisco, CA
+    bullets:
+      - Built a Python-based semantic search engine leveraging high-dimensional vector embeddings to index, parse, and summarize massive volumes of unstructured video and voice data for equity research
+      - Developed an AI agent architecture equipped with a model-agnostic runtime framework, allowing the agent to dynamically hot-swap different factor risk models as modular tools during automated data analysis.
+
+  - role: Undergraduate Researcher
+    company: UC Berkeley URAP & Flux Robotics
+    dates: Sep-Dec 2024
+    location: Berkeley, CA
+    bullets:
+      - Engineered data pipelines to aggregate robotic hardware specs and historical sales data into a time-series database.
+      - Built multivariate OLS models via NumPy to analyze the statistical relationship between hardware specs and pricing.
+      - Analyzed regression coefficients to quantify the marginal price increase driven by specific hardware metrics.
+
+  - role: Summer ML Researcher
+    company: NKU Undergraduate Research
+    dates: May-Jul 2023
+    location: Highland Heights, KY
+    bullets:
+      - Trained an SVM classifier using FFT feature extraction to achieve a 98% out-of-sample signal classification accuracy.
+      - Deployed the model onto a Arduino micro controller using optimized C++ to minimize local runtime execution latency.
+      - Applied frequency-domain filters to eliminate ambient noise and boost real-world signal detection by 35%.
+
+projects:
+  - name: Modular Market Maker & Liquidity Engine
+    technologies: Python, FastAPI, NumPy, React
+    bullets:
+      - Designed an app template with hot-swappable pricing models for diverse asset classes (carbon credits, digital goods).
+      - Implemented linear price-impact models adjusting spreads based on inventory skew to mitigate directional risk.
+      - Engineered a plug-and-play architecture to seamlessly calibrate coefficients and deploy custom liquidity strategies.
+
+  - name: "Library of Mestionora (Decentralized Storage Network, 3rd place hackathon winner)"
+    technologies: Networking, Cryptography
+    bullets:
+      - "Built a decentralized, fault tolerant storage protocol over I2P to back up LoC, Gutenberg, and other important archives."
+      - Developed a game theoretic node reputation system to penalize malicious actors and guarantee data redundancy.
+      - Engineered a self-healing architecture utilizing BFS-style propagation to broadcast replication calls across peer clusters.
+
+  - name: Ground Up Voice Recognition Model
+    technologies: SciPy, NumPy, SVD, PCA
+    bullets:
+      - Engineered a signal recognition model from scratch, applying SVD and PCA for matrix decomposition of raw audio.
+      - Optimized the model, capturing 90% of variance via top eigenvalues to achieve a 95% out-of-sample classification rate.
+
+  - name: "Research Project: Social Media Sentiment & Short-Term Equity Correlation"
+    technologies: Python, NumPy, Matplotlib
+    bullets:
+      - Built alternative data pipeline to ingest and score sentiment metrics from unstructured social media streams using ML.
+      - Developed a vectorized backtesting framework to evaluate signal viability, systematically measuring the predictive power, information coefficient, and forward-return correlation of sentiment inputs.
+
+  - name: Poker Theory & GTO Engine
+    technologies: Python, NumPy
+    bullets:
+      - Developed a high-performance Monte Carlo simulator to compute expected value and win probabilities of poker hands.
+      - "Implemented \"range\" feature, allowing for probabilistic distributions of hands to be evaluated against each other."
+      - Allowed grouping of board textures in order to allow analysis of win percentages across specific types of boards.
+
+  - name: "Graduate Course Project: Stochastic Noise Simulator"
+    technologies: Python, NumPy, PyDAE
+    bullets:
+      - Built a transfer function solver using Newton-Raphson algorithms to compute DC quiescent equilibrium.
+      - Linearized differential algebraic equations via automated Jacobian extraction around operating points.
+      - "Solved complex linear systems (A(jw) = G + jwC) over log frequency sweeps to map Power Spectral Density."
+
+skills:
+  - category: Programming
+    content: "(proficient): Python, Java, MATLAB, C (competent): C++, C#, R, SQL, Bash"
+  - category: Data & ML
+    content: "NumPy, Pandas, PyTorch, SciPy, Time-Series Forecasting, Regression, PCA/SVD, Statistical Modeling"
+  - category: Tools & Platforms
+    content: "Docker, GCP, Linux/Ubuntu Server, Git, CI/CD, PostgreSQL, MilvusDB, LangGraph, Unit Testing"
+  - category: Interests
+    content: "Poker Theory, Game Theory, MTG, Linux Architecture, Privacy/Security, Open Source, HKN, Entrepreneurship"

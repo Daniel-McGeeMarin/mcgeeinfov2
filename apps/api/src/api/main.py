@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from api.routers.poker import router as poker_router
 from api.routers.jobs import router as jobs_router, get_ingester
 from api.routers.modelfit import router as modelfit_router
+from api.routers.resume import router as resume_router
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +52,7 @@ app = FastAPI(
 app.include_router(poker_router)
 app.include_router(jobs_router)
 app.include_router(modelfit_router)
+app.include_router(resume_router)
 
 app.add_middleware(
     CORSMiddleware,

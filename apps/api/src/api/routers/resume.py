@@ -3,6 +3,7 @@ import os
 import time
 import uuid
 import xml.etree.ElementTree as ET
+from urllib.parse import urlparse, urlunparse
 
 import httpx
 import yaml
@@ -103,6 +104,11 @@ async def preview(request: Request):
             pdf_url = root.findtext("FileUrl")
             if not pdf_url:
                 raise HTTPException(502, "OnlyOffice did not return FileUrl")
+
+            # OnlyOffice returns fileUrl as http://localhost:<host-port>/cache/...
+            # Rewrite the host to reach it from inside this container instead.
+            oo = urlparse(_ONLYOFFICE)
+            pdf_url = urlunparse(urlparse(pdf_url)._replace(scheme=oo.scheme, netloc=oo.netloc))
 
             pdf = await client.get(pdf_url)
             if pdf.status_code != 200:

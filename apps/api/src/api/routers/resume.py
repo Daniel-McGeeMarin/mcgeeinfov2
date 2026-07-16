@@ -2,6 +2,7 @@ import importlib.resources
 import os
 import time
 import uuid
+import xml.etree.ElementTree as ET
 
 import httpx
 import yaml
@@ -94,12 +95,14 @@ async def preview(request: Request):
             )
             if conv.status_code != 200:
                 raise HTTPException(502, f"OnlyOffice returned {conv.status_code}")
-            result = conv.json()
-            if result.get("error"):
-                raise HTTPException(502, f"OnlyOffice error code {result['error']}")
-            pdf_url = result.get("fileUrl")
+            # ConvertService always responds with XML regardless of request content-type
+            root = ET.fromstring(conv.text)
+            error_el = root.find("Error")
+            if error_el is not None:
+                raise HTTPException(502, f"OnlyOffice error code {error_el.text}")
+            pdf_url = root.findtext("FileUrl")
             if not pdf_url:
-                raise HTTPException(502, "OnlyOffice did not return fileUrl")
+                raise HTTPException(502, "OnlyOffice did not return FileUrl")
 
             pdf = await client.get(pdf_url)
             if pdf.status_code != 200:

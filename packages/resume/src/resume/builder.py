@@ -125,19 +125,16 @@ def _section_hdr(body, title: str, *, before: int,
 
 
 def _education(body, edu: dict):
-    p = _p()
-    pp = _pPr(p)
-    _e(pp, "w:pBdr")
-    tabs = _e(pp, "w:tabs")
-    _e(tabs, "w:tab", {"w:val": "left", "w:leader": "none", "w:pos": "7420"})
-    _e(tabs, "w:tab", {"w:val": "left", "w:leader": "none", "w:pos": "9634"})
-    _e(pp, "w:spacing", {"w:before": "73", "w:line": "264", "w:lineRule": "auto"})
-    _e(pp, "w:ind", {"w:right": "9", "w:firstLine": "0", "w:left": "12"})
-    rp = _e(pp, "w:rPr")
-    _e(rp, "w:i"); _e(rp, "w:iCs")
+    # Row 1: institution, program (left) | Expected Graduation (right)
+    p1 = _p()
+    pp1 = _pPr(p1)
+    _e(pp1, "w:pBdr")
+    _e(_e(pp1, "w:tabs"), "w:tab", {"w:val": "right", "w:leader": "none", "w:pos": "9634"})
+    _e(pp1, "w:spacing", {"w:before": "73", "w:line": "264", "w:lineRule": "auto"})
+    _e(pp1, "w:ind", {"w:right": "9", "w:firstLine": "0", "w:left": "12"})
+    _e(pp1, "w:rPr")
 
-    _rn(p, edu["institution"] + ", ", b=True, sz="24")
-
+    _rn(p1, edu["institution"] + ", ", b=True, sz="24")
     r = _r()
     rp2 = _e(r, "w:rPr")
     _e(rp2, "w:i"); _e(rp2, "w:iCs")
@@ -145,37 +142,55 @@ def _education(body, edu: dict):
     _e(rp2, "w:rtl", {"w:val": "0"})
     _t(r, edu["program"])
     _e(r, "w:tab")
-    _t(r, "          ")
-    p.append(r)
+    p1.append(r)
+    _rn(p1, f"Expected Graduation: {edu['graduation']}", b=True)
+    body.append(p1)
 
-    _rn(p, f"Expected Graduation: {edu['graduation']}  Dual Degree", b=True)
-    _rn(p, f": {edu['degree']}" + " " * 53)
-    _rn(p, f"GPA: {edu['gpa']} ", b=True)
+    # Row 2: Dual Degree: degree (left) | GPA (right)
+    p2 = _p()
+    pp2 = _pPr(p2)
+    _e(pp2, "w:pBdr")
+    _e(_e(pp2, "w:tabs"), "w:tab", {"w:val": "right", "w:leader": "none", "w:pos": "9634"})
+    _e(pp2, "w:spacing", {"w:line": "264", "w:lineRule": "auto"})
+    _e(pp2, "w:ind", {"w:right": "9", "w:firstLine": "0", "w:left": "12"})
+    _e(pp2, "w:rPr")
 
-    for gi, cg in enumerate(edu.get("coursework", [])):
-        _rn(p, f"{cg['label']}:", b=True)
+    _rn(p2, "Dual Degree: ", b=True)
+    _rn(p2, edu["degree"])
+    r2 = _r()
+    _e(r2, "w:rPr")
+    _e(r2, "w:tab")
+    p2.append(r2)
+    _rn(p2, f"GPA: {edu['gpa']}", b=True)
+    body.append(p2)
+
+    # Coursework rows (one paragraph per group)
+    for cg in edu.get("coursework", []):
+        pc = _p()
+        ppc = _pPr(pc)
+        _e(ppc, "w:pBdr")
+        _e(ppc, "w:spacing", {"w:line": "264", "w:lineRule": "auto"})
+        _e(ppc, "w:ind", {"w:right": "9", "w:firstLine": "0", "w:left": "12"})
+        _e(ppc, "w:rPr")
+        _rn(pc, f"{cg['label']}:", b=True)
         for ci, course in enumerate(cg["courses"]):
             sep = " " if ci == 0 else ", "
-            _rn(p, f"{sep}{course['number']}")
+            _rn(pc, f"{sep}{course['number']}")
             if course.get("name"):
-                _rn(p, f"({course['name']})", i=True)
+                _rn(pc, f" ({course['name']})", i=True)
         for ei, course in enumerate(cg.get("expected", [])):
-            _rn(p, " Expected: " if ei == 0 else ", ", b=(ei == 0))
-            _rn(p, course["number"])
+            _rn(pc, " Expected: " if ei == 0 else ", ", b=(ei == 0))
+            _rn(pc, course["number"])
             if course.get("name"):
-                _rn(p, f"({course['name']})", i=True)
-        if gi < len(edu.get("coursework", [])) - 1:
-            _rn(p, " ")
-
-    body.append(p)
+                _rn(pc, f" ({course['name']})", i=True)
+        body.append(pc)
 
 
 def _experience(body, exp: dict):
     p = _p()
     pp = _pPr(p)
     _e(pp, "w:pBdr")
-    tabs = _e(pp, "w:tabs")
-    _e(tabs, "w:tab", {"w:val": "left", "w:leader": "none", "w:pos": "7294"})
+    _e(_e(pp, "w:tabs"), "w:tab", {"w:val": "right", "w:leader": "none", "w:pos": "9634"})
     _e(pp, "w:spacing", {"w:before": "33"})
     _e(pp, "w:ind", {"w:firstLine": "0", "w:left": "12"})
     rp = _e(pp, "w:rPr")
@@ -190,7 +205,6 @@ def _experience(body, exp: dict):
     _e(rp2, "w:rtl", {"w:val": "0"})
     _t(r, exp["company"])
     _e(r, "w:tab")
-    _t(r, "          ")
     p.append(r)
 
     _rn(p, f"{exp['dates']} | {exp['location']}", b=True)
@@ -250,8 +264,7 @@ def _project(body, proj: dict):
     p = _p()
     pp = _pPr(p)
     _e(pp, "w:pBdr")
-    tabs = _e(pp, "w:tabs")
-    _e(tabs, "w:tab", {"w:val": "left", "w:leader": "none", "w:pos": "8692"})
+    _e(_e(pp, "w:tabs"), "w:tab", {"w:val": "right", "w:leader": "none", "w:pos": "9634"})
     _e(pp, "w:spacing")
     _e(pp, "w:ind", {"w:firstLine": "0", "w:left": "12"})
     rp = _e(pp, "w:rPr")

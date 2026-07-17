@@ -1,8 +1,14 @@
 FROM python:3.12-slim
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libreoffice-writer \
+RUN apt-get update \
+    && echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" \
+       | debconf-set-selections \
+    && apt-get install -y --no-install-recommends \
+       libreoffice-writer \
+       ttf-mscorefonts-installer \
+       fontconfig \
+    && fc-cache -f \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv

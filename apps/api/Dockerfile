@@ -1,7 +1,9 @@
 FROM python:3.12-slim
 WORKDIR /app
 
-RUN apt-get update \
+RUN echo "deb http://deb.debian.org/debian $(. /etc/os-release && echo $VERSION_CODENAME) contrib" \
+       > /etc/apt/sources.list.d/contrib.list \
+    && apt-get update \
     && echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" \
        | debconf-set-selections \
     && apt-get install -y --no-install-recommends \

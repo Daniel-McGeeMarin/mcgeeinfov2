@@ -22,7 +22,14 @@ export async function getPokerEquity({ hero, board, opponents, trials }) {
 // ---------------------------------------------------------------------------
 
 async function jobsRequest(path, options = {}) {
-  const res = await fetch(`/api/jobs${path}`, options)
+  const res = await fetch(`/api/jobs${path}`, { redirect: 'manual', ...options })
+  // redirect: 'manual' gives us an opaqueredirect (status 0) instead of following
+  // a cross-origin 302 — which would CORS-fail silently. Redirect means Authelia
+  // said "not authenticated", so bounce the browser to the login portal.
+  if (res.type === 'opaqueredirect') {
+    window.location.href = `https://auth.mcgeedan.com/?rd=${encodeURIComponent(window.location.href)}`
+    return new Promise(() => {})
+  }
   if (!res.ok) {
     const body = await res.json().catch(() => null)
     throw new Error(body?.detail ?? body?.error ?? `Request failed (${res.status})`)
@@ -73,4 +80,41 @@ export const jobsApi = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ source_id: sourceId, config }),
     }),
+}
+
+// ---------------------------------------------------------------------------
+// Resume saved versions API (auth-gated — opaqueredirect → login portal)
+// ---------------------------------------------------------------------------
+
+async function resumeRequest(path, options = {}) {
+  const res = await fetch(`/api/resume/saved${path}`, { redirect: 'manual', ...options })
+  if (res.type === 'opaqueredirect') {
+    const err = new Error('Not authenticated')
+    err.status = 401
+    throw err
+  }
+  if (!res.ok) {
+    const body = await res.json().catch(() => null)
+    throw new Error(body?.detail ?? `Request failed (${res.status})`)
+  }
+  if (res.status === 204) return null
+  return res.json()
+}
+
+export const resumeApi = {
+  list: () => resumeRequest(''),
+  get: (id) => resumeRequest(`/${id}`),
+  create: (name, yaml) =>
+    resumeRequest('', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, yaml }),
+    }),
+  update: (id, { name, yaml } = {}) =>
+    resumeRequest(`/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, yaml }),
+    }),
+  delete: (id) => resumeRequest(`/${id}`, { method: 'DELETE' }),
 }

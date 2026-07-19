@@ -1,15 +1,25 @@
 import importlib.resources
+import os
 import subprocess
 import tempfile
+from pathlib import Path
 
 import yaml
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import Response
+from pydantic import BaseModel
 
 from resume import build_resume
+from resume.db import ResumeDB
 
 router = APIRouter(prefix="/api/resume", tags=["resume"])
 
+_db = ResumeDB(Path(os.environ.get("RESUME_DB_PATH", "./resume.db")))
+
+
+# ---------------------------------------------------------------------------
+# Build / preview
+# ---------------------------------------------------------------------------
 
 @router.post("/build")
 async def build(request: Request):
@@ -78,3 +88,49 @@ async def preview(request: Request):
 def get_default():
     text = (importlib.resources.files("resume") / "default.yaml").read_text(encoding="utf-8")
     return Response(content=text, media_type="text/plain; charset=utf-8")
+
+
+# ---------------------------------------------------------------------------
+# Saved resumes (auth-gated at Caddy — /api/resume/saved/*)
+# ---------------------------------------------------------------------------
+
+class SaveBody(BaseModel):
+    name: str
+    yaml: str
+
+
+class PatchBody(BaseModel):
+    name: str | None = None
+    yaml: str | None = None
+
+
+@router.get("/saved")
+def list_saved():
+    return _db.list_resumes()
+
+
+@router.get("/saved/{resume_id}")
+def get_saved(resume_id: str):
+    row = _db.get_resume(resume_id)
+    if row is None:
+        raise HTTPException(404, "Not found")
+    return row
+
+
+@router.post("/saved", status_code=201)
+def create_saved(body: SaveBody):
+    return _db.create_resume(body.name, body.yaml)
+
+
+@router.patch("/saved/{resume_id}")
+def update_saved(resume_id: str, body: PatchBody):
+    row = _db.update_resume(resume_id, body.name, body.yaml)
+    if row is None:
+        raise HTTPException(404, "Not found")
+    return row
+
+
+@router.delete("/saved/{resume_id}", status_code=204)
+def delete_saved(resume_id: str):
+    if not _db.delete_resume(resume_id):
+        raise HTTPException(404, "Not found")

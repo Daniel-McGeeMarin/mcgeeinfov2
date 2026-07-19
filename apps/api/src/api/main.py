@@ -60,7 +60,7 @@ app.add_middleware(
         "https://mcgeedan.com",
         "http://localhost:5173",
     ],
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE"],
     allow_headers=["*"],
 )
 

@@ -549,7 +549,6 @@ export default function ResumeEdit() {
               value={yamlText}
               onChange={setYamlText}
               extensions={editorExtensions}
-              theme={editorTheme}
               height="100%"
               style={{ minHeight: '100%' }}
               basicSetup={{

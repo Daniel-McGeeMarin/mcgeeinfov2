@@ -5,6 +5,7 @@ import CodeMirror from '@uiw/react-codemirror'
 import { yaml } from '@codemirror/lang-yaml'
 import { EditorView } from '@codemirror/view'
 import { HighlightStyle, syntaxHighlighting } from '@codemirror/language'
+import { oneDark } from '@codemirror/theme-one-dark'
 import { tags as t } from '@lezer/highlight'
 
 import { resumeApi } from '../api'
@@ -19,28 +20,24 @@ const yamlHighlight = HighlightStyle.define([
   { tag: t.bool,         color: '#f9a8d4' },  // pink-300  — booleans/null
   { tag: t.null,         color: '#f9a8d4' },
   { tag: t.keyword,      color: '#fbbf24' },  // amber     — --- markers
-  { tag: t.punctuation,  color: '#71717a' },  // neutral-500
+  { tag: t.punctuation,  color: '#71717a' },
   { tag: t.operator,     color: '#71717a' },
   { tag: t.meta,         color: '#fbbf24' },
 ])
 
-const editorBaseTheme = EditorView.theme({
-  '&':                    { background: '#0a0a0a', color: '#d4d4d4', fontSize: '12px' },
-  '.cm-content':          { fontFamily: 'ui-monospace, monospace', caretColor: '#fbbf24', padding: '16px 0' },
-  '.cm-cursor':           { borderLeftColor: '#fbbf24' },
-  '.cm-gutters':          { background: '#0a0a0a', color: '#525252', border: 'none', paddingRight: '8px', minWidth: '36px' },
-  '.cm-activeLineGutter': { background: '#111111' },
-  '.cm-activeLine':       { background: '#111111' },
-  '&.cm-focused .cm-selectionBackground, .cm-selectionBackground': { background: '#2d2d2d !important' },
-  '.cm-line':             { paddingLeft: '16px' },
-  '.cm-scroller':         { overflow: 'auto' },
-}, { dark: true })
+// Font/size tweaks on top of oneDark base
+const editorSizeTheme = EditorView.theme({
+  '&':           { fontSize: '12px' },
+  '.cm-content': { fontFamily: 'ui-monospace, monospace', padding: '16px 0' },
+  '.cm-line':    { paddingLeft: '16px' },
+  '.cm-gutters': { paddingRight: '8px', minWidth: '36px' },
+})
 
 const editorExtensions = [
   yaml(),
   EditorView.lineWrapping,
   syntaxHighlighting(yamlHighlight),
-  editorBaseTheme,
+  editorSizeTheme,
 ]
 
 // ── AI prompt builder ─────────────────────────────────────────────────────────
@@ -548,6 +545,7 @@ export default function ResumeEdit() {
             <CodeMirror
               value={yamlText}
               onChange={setYamlText}
+              theme={oneDark}
               extensions={editorExtensions}
               height="100%"
               style={{ minHeight: '100%' }}

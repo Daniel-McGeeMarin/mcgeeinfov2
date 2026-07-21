@@ -35,7 +35,6 @@ const editorSizeTheme = EditorView.theme({
 
 const editorExtensions = [
   yaml(),
-  EditorView.lineWrapping,
   syntaxHighlighting(yamlHighlight),
   editorSizeTheme,
 ]
@@ -283,6 +282,7 @@ export default function ResumeEdit() {
 
   // resizable split
   const [splitPct, setSplitPct] = useState(40)
+  const [isDragging, setIsDragging] = useState(false)
   const containerRef = useRef(null)
 
   useEffect(() => {
@@ -303,13 +303,15 @@ export default function ResumeEdit() {
 
   function startDrag(e) {
     e.preventDefault()
+    setIsDragging(true)
     function move(e) {
       if (!containerRef.current) return
       const rect = containerRef.current.getBoundingClientRect()
       const pct = ((e.clientX - rect.left) / rect.width) * 100
-      setSplitPct(Math.max(20, Math.min(75, pct)))
+      setSplitPct(Math.max(10, Math.min(90, pct)))
     }
     function up() {
+      setIsDragging(false)
       document.removeEventListener('mousemove', move)
       document.removeEventListener('mouseup', up)
     }
@@ -529,6 +531,9 @@ export default function ResumeEdit() {
 
       {/* ── Body ── */}
       <div ref={containerRef} className="relative flex flex-1 overflow-hidden select-none">
+        {/* Intercepts mouse events over iframe during drag so mouseup is never lost */}
+        {isDragging && <div className="fixed inset-0 z-50 cursor-col-resize" />}
+
         <ResumeDrawer
           open={drawerOpen}
           onClose={() => setDrawerOpen(false)}

@@ -164,22 +164,27 @@ def _education(body, edu: dict):
     _rn(p2, f"GPA: {edu['gpa']}", b=True)
     body.append(p2)
 
-    # Coursework rows (one paragraph per group)
-    for cg in edu.get("coursework", []):
+    # All coursework groups on one line; expected courses gathered at the end
+    if edu.get("coursework"):
         pc = _p()
         ppc = _pPr(pc)
         _e(ppc, "w:pBdr")
         _e(ppc, "w:spacing", {"w:line": "264", "w:lineRule": "auto"})
         _e(ppc, "w:ind", {"w:right": "9", "w:firstLine": "0", "w:left": "12"})
         _e(ppc, "w:rPr")
-        _rn(pc, f"{cg['label']}:", b=True)
-        for ci, course in enumerate(cg["courses"]):
-            sep = " " if ci == 0 else ", "
-            _rn(pc, f"{sep}{course['number']}")
-            if course.get("name"):
-                _rn(pc, f" ({course['name']})", i=True)
-        for ei, course in enumerate(cg.get("expected", [])):
-            _rn(pc, " Expected: " if ei == 0 else ", ", b=(ei == 0))
+        all_expected = []
+        for gi, cg in enumerate(edu["coursework"]):
+            all_expected.extend(cg.get("expected", []))
+            if gi > 0:
+                _rn(pc, "  ")
+            _rn(pc, f"{cg['label']}:", b=True)
+            for ci, course in enumerate(cg["courses"]):
+                sep = " " if ci == 0 else ", "
+                _rn(pc, f"{sep}{course['number']}")
+                if course.get("name"):
+                    _rn(pc, f" ({course['name']})", i=True)
+        for ei, course in enumerate(all_expected):
+            _rn(pc, "  Expected: " if ei == 0 else ", ", b=(ei == 0))
             _rn(pc, course["number"])
             if course.get("name"):
                 _rn(pc, f" ({course['name']})", i=True)

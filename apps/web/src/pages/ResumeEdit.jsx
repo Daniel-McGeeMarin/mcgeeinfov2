@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Bot, Check, ChevronRight, Download, FileText, FolderOpen, RefreshCw, Save, Trash2, X } from 'lucide-react'
 import CodeMirror from '@uiw/react-codemirror'
 import { yaml } from '@codemirror/lang-yaml'
-import { EditorView } from '@codemirror/view'
+import { Decoration, EditorView, ViewPlugin } from '@codemirror/view'
+import { RangeSetBuilder } from '@codemirror/state'
 import { HighlightStyle, syntaxHighlighting } from '@codemirror/language'
 import { oneDark } from '@codemirror/theme-one-dark'
 import { tags as t } from '@lezer/highlight'
@@ -25,6 +26,35 @@ const yamlHighlight = HighlightStyle.define([
   { tag: t.meta,         color: '#fbbf24' },
 ])
 
+// Hanging indent for wrapped lines: continuation aligns to first visible char.
+// padding-left: Nch pushes the content box right; text-indent: -Nch pulls the
+// first visual line back left by the same amount, so the first line appears
+// at the same position as before and wrapped lines indent to column N.
+const hangingIndent = ViewPlugin.fromClass(class {
+  constructor(view) { this.decorations = this.build(view) }
+  update(u) {
+    if (u.docChanged || u.viewportChanged) this.decorations = this.build(u.view)
+  }
+  build(view) {
+    const builder = new RangeSetBuilder()
+    for (const { from, to } of view.visibleRanges) {
+      let pos = from
+      while (pos <= to) {
+        const line = view.state.doc.lineAt(pos)
+        let n = 0
+        while (n < line.text.length && line.text[n] === ' ') n++
+        if (n > 0) {
+          builder.add(line.from, line.from, Decoration.line({
+            attributes: { style: `padding-left:${n}ch;text-indent:-${n}ch` },
+          }))
+        }
+        pos = line.to + 1
+      }
+    }
+    return builder.finish()
+  }
+}, { decorations: v => v.decorations })
+
 // Font/size tweaks on top of oneDark base
 const editorSizeTheme = EditorView.theme({
   '&':           { fontSize: '12px' },
@@ -35,7 +65,9 @@ const editorSizeTheme = EditorView.theme({
 
 const editorExtensions = [
   yaml(),
+  EditorView.lineWrapping,
   syntaxHighlighting(yamlHighlight),
+  hangingIndent,
   editorSizeTheme,
 ]
 

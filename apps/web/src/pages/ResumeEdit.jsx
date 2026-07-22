@@ -84,6 +84,7 @@ header:
   phone: "555.555.5555"                    # required — always quote
   email: you@email.com                     # required
   linkedin: linkedin.com/in/handle        # required
+  github: github.com/yourhandle           # optional
 
 education:
   - institution: "University Name"         # required

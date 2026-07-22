@@ -21,7 +21,7 @@ def build_resume(data: dict) -> bytes:
 
     hdr = data["header"]
     _name(body, hdr["name"])
-    _contact(body, hdr["phone"], hdr["email"], hdr["linkedin"])
+    _contact(body, hdr["phone"], hdr["email"], hdr["linkedin"], hdr.get("github"))
 
     _section_hdr(body, "Education", before=111, line_v=238746, line_doc_id=1, line_sp_id=5)
     for edu in data["education"]:
@@ -72,7 +72,7 @@ def _name(body, name: str):
     body.append(p)
 
 
-def _contact(body, phone: str, email: str, linkedin: str):
+def _contact(body, phone: str, email: str, linkedin: str, github: str | None = None):
     p = _p()
     pp = _pPr(p)
     _e(pp, "w:widowControl", {"w:val": "true"})
@@ -83,10 +83,13 @@ def _contact(body, phone: str, email: str, linkedin: str):
     rp = _e(pp, "w:rPr")
     _e(rp, "w:smallCaps")
 
+    parts = [phone, email, linkedin]
+    if github:
+        parts.append(github)
     r = _r()
     rp2 = _e(r, "w:rPr")
     _e(rp2, "w:rtl", {"w:val": "0"})
-    _t(r, f"{phone}   |   {email}   |   {linkedin}")
+    _t(r, "   |   ".join(parts))
     p.append(r)
     body.append(p)
 

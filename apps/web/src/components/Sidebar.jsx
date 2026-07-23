@@ -34,68 +34,73 @@ function NavItems({ onNavigate }) {
         ))}
       </nav>
 
-      <div className="mt-8">
-        <p className="px-3 text-xs font-semibold uppercase tracking-wider text-neutral-600">
-          Web Apps
-        </p>
-        <ul className="mt-2 flex flex-col gap-0.5">
-          {webApps.map((app) => {
-            const isLive = app.status === 'live'
+      {[
+        { label: 'Tools', category: 'tools' },
+        { label: 'Fun / Educational', category: 'educational' },
+      ].map(({ label, category }) => (
+        <div key={category} className="mt-8">
+          <p className="px-3 text-xs font-semibold uppercase tracking-wider text-neutral-600">
+            {label}
+          </p>
+          <ul className="mt-2 flex flex-col gap-0.5">
+            {webApps.filter(a => a.category === category).map((app) => {
+              const isLive = app.status === 'live'
 
-            if (app.private) {
+              if (app.private) {
+                return (
+                  <li key={app.name} className="group/app relative">
+                    <Link
+                      to={app.href}
+                      onClick={onNavigate}
+                      className="flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm text-neutral-500 transition-colors hover:bg-neutral-900 hover:text-neutral-300"
+                    >
+                      <Lock size={10} className="shrink-0 text-neutral-600" />
+                      <span className="truncate">{app.name}</span>
+                    </Link>
+                    <div className="pointer-events-none absolute left-full top-0 z-50 ml-3 w-60 rounded-lg border border-neutral-800 bg-neutral-900 p-3 text-xs text-neutral-400 opacity-0 shadow-xl transition-opacity group-hover/app:opacity-100">
+                      <p className="mb-1 font-medium text-neutral-300">{app.name}</p>
+                      <p className="leading-relaxed">{app.description}</p>
+                      <p className="mt-2 text-[10px] text-neutral-600 uppercase tracking-wide">Private — requires login</p>
+                    </div>
+                  </li>
+                )
+              }
+
+              const content = (
+                <>
+                  <Circle
+                    size={7}
+                    className={isLive ? 'fill-emerald-400 text-emerald-400' : 'fill-neutral-700 text-neutral-700'}
+                  />
+                  <span className="truncate">{app.name}</span>
+                  {!isLive && (
+                    <span className="ml-auto shrink-0 text-[10px] font-medium uppercase tracking-wide text-neutral-600">
+                      Soon
+                    </span>
+                  )}
+                </>
+              )
               return (
-                <li key={app.name} className="group/app relative">
-                  <Link
-                    to={app.href}
-                    onClick={onNavigate}
-                    className="flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm text-neutral-500 transition-colors hover:bg-neutral-900 hover:text-neutral-300"
-                  >
-                    <Lock size={10} className="shrink-0 text-neutral-600" />
-                    <span className="truncate">{app.name}</span>
-                  </Link>
-                  <div className="pointer-events-none absolute left-full top-0 z-50 ml-3 w-60 rounded-lg border border-neutral-800 bg-neutral-900 p-3 text-xs text-neutral-400 opacity-0 shadow-xl transition-opacity group-hover/app:opacity-100">
-                    <p className="mb-1 font-medium text-neutral-300">{app.name}</p>
-                    <p className="leading-relaxed">{app.description}</p>
-                    <p className="mt-2 text-[10px] text-neutral-600 uppercase tracking-wide">Private — requires login</p>
-                  </div>
+                <li key={app.name}>
+                  {isLive ? (
+                    <Link
+                      to={app.href}
+                      onClick={onNavigate}
+                      className="flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm text-neutral-400 transition-colors hover:bg-neutral-900 hover:text-neutral-100"
+                    >
+                      {content}
+                    </Link>
+                  ) : (
+                    <div className="flex cursor-default items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm text-neutral-600">
+                      {content}
+                    </div>
+                  )}
                 </li>
               )
-            }
-
-            const content = (
-              <>
-                <Circle
-                  size={7}
-                  className={isLive ? 'fill-emerald-400 text-emerald-400' : 'fill-neutral-700 text-neutral-700'}
-                />
-                <span className="truncate">{app.name}</span>
-                {!isLive && (
-                  <span className="ml-auto shrink-0 text-[10px] font-medium uppercase tracking-wide text-neutral-600">
-                    Soon
-                  </span>
-                )}
-              </>
-            )
-            return (
-              <li key={app.name}>
-                {isLive ? (
-                  <Link
-                    to={app.href}
-                    onClick={onNavigate}
-                    className="flex items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm text-neutral-400 transition-colors hover:bg-neutral-900 hover:text-neutral-100"
-                  >
-                    {content}
-                  </Link>
-                ) : (
-                  <div className="flex cursor-default items-center gap-2.5 rounded-lg px-3 py-1.5 text-sm text-neutral-600">
-                    {content}
-                  </div>
-                )}
-              </li>
-            )
-          })}
-        </ul>
-      </div>
+            })}
+          </ul>
+        </div>
+      ))}
     </>
   )
 }

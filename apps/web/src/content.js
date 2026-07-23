@@ -35,26 +35,12 @@ export const about = {
 // Portfolio page. `status: "soon"` renders as non-clickable.
 export const webApps = [
   {
-    name: "Model Fitter",
-    description: "Fit linear, quadratic, and exponential models to real datasets by typing live equations — see which generalises best to hidden test data.",
-    tags: ["Math", "Education", "Interactive"],
-    status: "live",
-    href: "/apps/modelfit",
-  },
-  {
-    name: "Poker Odds Simulator",
-    description: "Monte Carlo hand-equity simulator — see how your odds shift street by street.",
-    tags: ["Python", "Monte Carlo"],
-    status: "live",
-    href: "/apps/poker",
-    noAI: true,
-  },
-  {
     name: "Session Timer",
     description: "Paste a schedule, run through it segment by segment with alarms and smart snoozing.",
     tags: ["React", "Web Audio API"],
     status: "live",
     href: "/apps/session-timer",
+    category: "tools",
   },
   {
     name: "Resume Builder",
@@ -62,6 +48,7 @@ export const webApps = [
     tags: ["Python", "python-docx", "YAML"],
     status: "live",
     href: "/apps/resumedit",
+    category: "tools",
   },
   {
     name: "Job Browser",
@@ -70,6 +57,24 @@ export const webApps = [
     status: "live",
     href: "/apps/jobs",
     private: true,
+    category: "tools",
+  },
+  {
+    name: "Model Fitter",
+    description: "Fit linear, quadratic, and exponential models to real datasets by typing live equations — see which generalises best to hidden test data.",
+    tags: ["Math", "Education", "Interactive"],
+    status: "live",
+    href: "/apps/modelfit",
+    category: "educational",
+  },
+  {
+    name: "Poker Odds Simulator",
+    description: "Monte Carlo hand-equity simulator — see how your odds shift street by street.",
+    tags: ["Python", "Monte Carlo"],
+    status: "live",
+    href: "/apps/poker",
+    noAI: true,
+    category: "educational",
   },
 ]
 

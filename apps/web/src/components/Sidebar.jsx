@@ -161,10 +161,8 @@ export default function Sidebar() {
         <Link to="/" className="mb-8 px-3 font-mono text-sm font-medium text-neutral-100">
           {profile.name}
         </Link>
-        <div className="flex-1 overflow-y-auto">
-          <NavItems />
-        </div>
-        <div className="mt-4 border-t border-neutral-900 pt-2">
+        <NavItems />
+        <div className="mt-auto border-t border-neutral-900 pt-2">
           <AuthWidget />
         </div>
       </aside>

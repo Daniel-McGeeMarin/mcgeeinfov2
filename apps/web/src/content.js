@@ -56,7 +56,6 @@ export const webApps = [
     tags: ["Python", "SQLite", "FastAPI"],
     status: "live",
     href: "/apps/jobs",
-    private: true,
     category: "tools",
   },
   {

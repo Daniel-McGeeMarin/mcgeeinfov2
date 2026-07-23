@@ -18,18 +18,26 @@ export async function getPokerEquity({ hero, board, opponents, trials }) {
 }
 
 // ---------------------------------------------------------------------------
+// Auth status — proxied from Authelia's /api/user/info via Caddy
+// Returns user object { username, display_name, ... } or null if not logged in.
+// ---------------------------------------------------------------------------
+export async function getAuthStatus() {
+  try {
+    const res = await fetch('/api/auth/me')
+    if (!res.ok) return null
+    const body = await res.json()
+    return body?.data ?? null
+  } catch {
+    return null
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Jobs API
 // ---------------------------------------------------------------------------
 
 async function jobsRequest(path, options = {}) {
-  const res = await fetch(`/api/jobs${path}`, { redirect: 'manual', ...options })
-  // redirect: 'manual' gives us an opaqueredirect (status 0) instead of following
-  // a cross-origin 302 — which would CORS-fail silently. Redirect means Authelia
-  // said "not authenticated", so bounce the browser to the login portal.
-  if (res.type === 'opaqueredirect') {
-    window.location.href = `https://auth.mcgeedan.com/?rd=${encodeURIComponent(window.location.href)}`
-    return new Promise(() => {})
-  }
+  const res = await fetch(`/api/jobs${path}`, options)
   if (!res.ok) {
     const body = await res.json().catch(() => null)
     throw new Error(body?.detail ?? body?.error ?? `Request failed (${res.status})`)

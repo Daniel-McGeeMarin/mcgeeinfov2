@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { NavLink, Link } from 'react-router-dom'
 import { LayoutGrid, UserRound, FileText, Menu, X, Circle, Lock } from 'lucide-react'
 import { profile, webApps } from '../content'
+import { getAuthStatus } from '../api'
 
 const pageLinks = [
   { to: '/', label: 'Portfolio', icon: LayoutGrid, end: true },
@@ -99,6 +100,33 @@ function NavItems({ onNavigate }) {
   )
 }
 
+function AuthWidget() {
+  const [user, setUser] = useState(undefined)
+
+  useEffect(() => { getAuthStatus().then(setUser) }, [])
+
+  if (user === undefined) return (
+    <div className="h-8" />
+  )
+
+  if (!user) return (
+    <a
+      href="https://auth.mcgeedan.com"
+      className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-neutral-600 hover:text-neutral-400 transition-colors"
+    >
+      <Lock size={11} />
+      Sign in
+    </a>
+  )
+
+  return (
+    <div className="flex items-center gap-2 px-3 py-2 text-xs text-neutral-500">
+      <Circle size={7} className="fill-emerald-500 text-emerald-500 shrink-0" />
+      <span className="truncate">{user.display_name || user.username}</span>
+    </div>
+  )
+}
+
 export default function Sidebar() {
   const [open, setOpen] = useState(false)
 
@@ -133,7 +161,12 @@ export default function Sidebar() {
         <Link to="/" className="mb-8 px-3 font-mono text-sm font-medium text-neutral-100">
           {profile.name}
         </Link>
-        <NavItems />
+        <div className="flex-1 overflow-y-auto">
+          <NavItems />
+        </div>
+        <div className="mt-4 border-t border-neutral-900 pt-2">
+          <AuthWidget />
+        </div>
       </aside>
     </>
   )

@@ -55,6 +55,37 @@ const hangingIndent = ViewPlugin.fromClass(class {
   }
 }, { decorations: v => v.decorations })
 
+// Semantic highlight: role/name values in amber-bold, company in sky
+const SEMANTIC_KEYS = [
+  { re: /^(\s+role:\s+)(.+)$/,    style: 'color:#fbbf24;font-weight:600' },
+  { re: /^(\s+name:\s+)(.+)$/,    style: 'color:#fbbf24;font-weight:600' },
+  { re: /^(\s+company:\s+)(.+)$/, style: 'color:#bae6fd' },
+]
+
+const semanticHighlight = ViewPlugin.fromClass(class {
+  constructor(view) { this.decorations = this.build(view) }
+  update(u) { if (u.docChanged || u.viewportChanged) this.decorations = this.build(u.view) }
+  build(view) {
+    const builder = new RangeSetBuilder()
+    for (const { from, to } of view.visibleRanges) {
+      let pos = from
+      while (pos <= to) {
+        const line = view.state.doc.lineAt(pos)
+        for (const { re, style } of SEMANTIC_KEYS) {
+          const m = line.text.match(re)
+          if (m) {
+            builder.add(line.from + m[1].length, line.from + m[1].length + m[2].length,
+              Decoration.mark({ attributes: { style } }))
+            break
+          }
+        }
+        pos = line.to + 1
+      }
+    }
+    return builder.finish()
+  }
+}, { decorations: v => v.decorations })
+
 // Font/size tweaks on top of oneDark base
 const editorSizeTheme = EditorView.theme({
   '&':           { fontSize: '12px' },
@@ -68,6 +99,7 @@ const editorExtensions = [
   EditorView.lineWrapping,
   syntaxHighlighting(yamlHighlight),
   hangingIndent,
+  semanticHighlight,
   editorSizeTheme,
 ]
 

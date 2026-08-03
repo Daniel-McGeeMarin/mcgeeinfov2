@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { NavLink, Link } from 'react-router-dom'
-import { LayoutGrid, UserRound, FileText, Menu, X, Circle, Lock } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Circle, FileText, LayoutGrid, Lock, Menu, UserRound, X } from 'lucide-react'
 import { profile, webApps } from '../content'
 import { getAuthStatus } from '../api'
 
@@ -10,7 +10,7 @@ const pageLinks = [
   { to: '/resume', label: 'Resume', icon: FileText },
 ]
 
-function NavItems({ onNavigate }) {
+function NavItems({ collapsed, onNavigate }) {
   return (
     <>
       <nav className="flex flex-col gap-1">
@@ -20,8 +20,11 @@ function NavItems({ onNavigate }) {
             to={to}
             end={end}
             onClick={onNavigate}
+            title={collapsed ? label : undefined}
             className={({ isActive }) =>
-              `flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+              `flex items-center rounded-lg text-sm font-medium transition-colors ${
+                collapsed ? 'justify-center p-2' : 'gap-3 px-3 py-2'
+              } ${
                 isActive
                   ? 'bg-neutral-800/80 text-amber-300'
                   : 'text-neutral-400 hover:bg-neutral-900 hover:text-neutral-100'
@@ -29,12 +32,12 @@ function NavItems({ onNavigate }) {
             }
           >
             <Icon size={17} strokeWidth={2} />
-            {label}
+            {!collapsed && label}
           </NavLink>
         ))}
       </nav>
 
-      {[
+      {!collapsed && [
         { label: 'Tools', category: 'tools' },
         { label: 'Fun / Educational', category: 'educational' },
       ].map(({ label, category }) => (
@@ -110,9 +113,7 @@ function AuthWidget() {
 
   useEffect(() => { getAuthStatus().then(setUser) }, [])
 
-  if (user === undefined) return (
-    <div className="h-8" />
-  )
+  if (user === undefined) return <div className="h-8" />
 
   if (!user) return (
     <a
@@ -132,7 +133,7 @@ function AuthWidget() {
   )
 }
 
-export default function Sidebar() {
+export default function Sidebar({ collapsed = false, onToggle }) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -156,20 +157,44 @@ export default function Sidebar() {
         <div className="fixed inset-0 z-30 lg:hidden">
           <div className="absolute inset-0 bg-black/60" onClick={() => setOpen(false)} />
           <div className="absolute top-14 left-0 bottom-0 w-72 overflow-y-auto border-r border-neutral-900 bg-neutral-950 p-4">
-            <NavItems onNavigate={() => setOpen(false)} />
+            <NavItems collapsed={false} onNavigate={() => setOpen(false)} />
           </div>
         </div>
       )}
 
       {/* Desktop sidebar */}
-      <aside className="fixed top-0 left-0 hidden h-screen w-64 flex-col border-r border-neutral-900 bg-neutral-950 p-5 lg:flex">
-        <Link to="/" className="mb-8 px-3 font-mono text-sm font-medium text-neutral-100">
-          {profile.name}
-        </Link>
-        <NavItems />
-        <div className="mt-auto border-t border-neutral-900 pt-2">
-          <AuthWidget />
+      <aside
+        className={`fixed top-0 left-0 hidden h-screen flex-col border-r border-neutral-900 bg-neutral-950 lg:flex transition-[width] duration-200 overflow-hidden ${
+          collapsed ? 'w-14' : 'w-64'
+        }`}
+      >
+        {/* Header row */}
+        <div className={`flex shrink-0 items-center border-b border-neutral-900 h-14 ${collapsed ? 'justify-center px-2' : 'justify-between px-5'}`}>
+          {!collapsed && (
+            <Link to="/" className="font-mono text-sm font-medium text-neutral-100">
+              {profile.name}
+            </Link>
+          )}
+          <button
+            onClick={onToggle}
+            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            className="rounded p-1 text-neutral-600 transition-colors hover:text-neutral-300"
+          >
+            {collapsed ? <ChevronRight size={15} /> : <ChevronLeft size={15} />}
+          </button>
         </div>
+
+        {/* Nav */}
+        <div className={`flex-1 overflow-y-auto overflow-x-hidden ${collapsed ? 'px-2 py-3' : 'p-5'}`}>
+          <NavItems collapsed={collapsed} />
+        </div>
+
+        {/* Auth */}
+        {!collapsed && (
+          <div className="shrink-0 border-t border-neutral-900 pt-2">
+            <AuthWidget />
+          </div>
+        )}
       </aside>
     </>
   )

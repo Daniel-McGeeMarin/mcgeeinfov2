@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import Sidebar from './components/Sidebar'
@@ -29,6 +30,23 @@ function AnimatedRoutes() {
   )
 }
 
+function Layout() {
+  const location = useLocation()
+  const isApp = location.pathname.startsWith('/apps/')
+  const [collapsed, setCollapsed] = useState(isApp)
+
+  useEffect(() => { setCollapsed(isApp) }, [isApp])
+
+  return (
+    <div className="min-h-screen bg-neutral-950 text-neutral-100">
+      <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(v => !v)} />
+      <main className={`pt-14 lg:pt-0 transition-[padding-left] duration-200 ${collapsed ? 'lg:pl-14' : 'lg:pl-64'}`}>
+        <AnimatedRoutes />
+      </main>
+    </div>
+  )
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -37,17 +55,7 @@ export default function App() {
         <Route path="/apps/modelfit" element={<ModelFitApp />} />
 
         {/* Everything else gets the sidebar layout */}
-        <Route
-          path="*"
-          element={
-            <div className="min-h-screen bg-neutral-950 text-neutral-100">
-              <Sidebar />
-              <main className="pt-14 lg:pt-0 lg:pl-64">
-                <AnimatedRoutes />
-              </main>
-            </div>
-          }
-        />
+        <Route path="*" element={<Layout />} />
       </Routes>
     </BrowserRouter>
   )

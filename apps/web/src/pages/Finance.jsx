@@ -11,10 +11,10 @@ import {
 // ---------------------------------------------------------------------------
 
 const SOURCES = {
-  us_bank:     { label: 'US Bank',      color: 'bg-red-900/40 text-red-300 border-red-800',       exportUrl: 'https://onlinebanking.usbank.com/digital/servicing/account-summary',                                   hint: 'Accounts → select account → Download Activity' },
-  capital_one: { label: 'Capital One',  color: 'bg-blue-900/40 text-blue-300 border-blue-800',     exportUrl: 'https://myaccounts.capitalone.com/',                                                                    hint: 'Select card → Download transactions (CSV)' },
+  us_bank:     { label: 'US Bank',      color: 'bg-red-900/40 text-red-300 border-red-800',         exportUrl: 'https://onlinebanking.usbank.com/',                                                                    hint: 'Sign in → select account → Download Transactions' },
+  capital_one: { label: 'Capital One',  color: 'bg-blue-900/40 text-blue-300 border-blue-800',       exportUrl: 'https://myaccounts.capitalone.com/',                                                                  hint: 'Select card → the URL becomes /Card/<id>/DownloadTransactions — click that link' },
   discover:    { label: 'Discover',     color: 'bg-orange-900/40 text-orange-300 border-orange-800', exportUrl: 'https://portal.discover.com/customersvcs/universalLogin/ac_main',                                    hint: 'Statements & Activity → Download → Spreadsheet' },
-  venmo:       { label: 'Venmo',        color: 'bg-teal-900/40 text-teal-300 border-teal-800',      exportUrl: 'https://account.venmo.com/settings/statements',                                                       hint: 'Select month → Download CSV' },
+  venmo:       { label: 'Venmo',        color: 'bg-teal-900/40 text-teal-300 border-teal-800',        exportUrl: 'https://account.venmo.com/settings/statements',                                                     hint: 'Select month → Download CSV' },
   amazon:      { label: 'Amazon',       color: 'bg-yellow-900/40 text-yellow-300 border-yellow-800', exportUrl: 'https://www.amazon.com/gp/b2b/reports',                                                              hint: 'Order History Reports → Request Report → Download' },
 }
 

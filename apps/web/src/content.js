@@ -35,14 +35,6 @@ export const about = {
 // Portfolio page. `status: "soon"` renders as non-clickable.
 export const webApps = [
   {
-    name: "Session Timer",
-    description: "Paste a schedule, run through it segment by segment with alarms and smart snoozing.",
-    tags: ["React", "Web Audio API"],
-    status: "live",
-    href: "/apps/session-timer",
-    category: "tools",
-  },
-  {
     name: "Resume Builder",
     description: "Edit resume data as YAML and generate a formatted .docx — add experience and project entries on the fly, preview inline, and download.",
     tags: ["Python", "python-docx", "YAML"],
@@ -56,6 +48,23 @@ export const webApps = [
     tags: ["Python", "SQLite", "FastAPI"],
     status: "live",
     href: "/apps/jobs",
+    category: "tools",
+  },
+  {
+    name: "Finance Tracker",
+    description: "Import CSV exports from US Bank, Capital One, Discover, Venmo, and Amazon — auto-label reimbursable expenses, review, and lock in each budget cycle.",
+    tags: ["Python", "SQLite", "FastAPI"],
+    status: "live",
+    href: "/apps/finance",
+    private: true,
+    category: "tools",
+  },
+  {
+    name: "Session Timer",
+    description: "Paste a schedule, run through it segment by segment with alarms and smart snoozing.",
+    tags: ["React", "Web Audio API"],
+    status: "live",
+    href: "/apps/session-timer",
     category: "tools",
   },
   {

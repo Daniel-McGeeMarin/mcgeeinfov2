@@ -11,6 +11,7 @@ import Jobs from './pages/Jobs'
 import JobQueue from './pages/JobQueue'
 import ModelFitApp from './apps/modelfit/ModelFitApp'
 import ResumeEdit from './pages/ResumeEdit'
+import Finance from './pages/Finance'
 
 function AnimatedRoutes() {
   const location = useLocation()
@@ -25,6 +26,7 @@ function AnimatedRoutes() {
         <Route path="/apps/jobs" element={<Jobs />} />
         <Route path="/apps/jobs/queue" element={<JobQueue />} />
         <Route path="/apps/resumedit" element={<ResumeEdit />} />
+        <Route path="/apps/finance" element={<Finance />} />
       </Routes>
     </AnimatePresence>
   )

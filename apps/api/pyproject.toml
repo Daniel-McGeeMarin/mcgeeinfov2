@@ -9,6 +9,8 @@ dependencies = [
     "resume",
     "jobs",
     "modelfit",
+    "finance",
+    "python-multipart>=0.0.9",
 ]
 
 [tool.uv.sources]
@@ -16,6 +18,7 @@ poker     = { workspace = true }
 resume    = { workspace = true }
 jobs      = { workspace = true }
 modelfit  = { workspace = true }
+finance   = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]

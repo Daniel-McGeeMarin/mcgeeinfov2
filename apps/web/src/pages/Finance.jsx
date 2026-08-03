@@ -12,9 +12,7 @@ import {
 
 const SOURCES = {
   us_bank:     { label: 'US Bank',      color: 'bg-red-900/40 text-red-300 border-red-800',         exportUrl: 'https://onlinebanking.usbank.com/',                                                                    hint: 'Sign in → select account → Download Transactions' },
-  capital_one: { label: 'Capital One',  color: 'bg-blue-900/40 text-blue-300 border-blue-800',       exportUrl: 'https://myaccounts.capitalone.com/',                                                                  hint: 'Select card, then click the bookmarklet below to jump straight to Download Transactions',
-    // eslint-disable-next-line no-script-url
-    bookmarklet: "javascript:(function(){var u=window.location.href.split('?')[0].replace(/\\/+$/,'');if(u.includes('/Card/')){window.location.href=u.endsWith('/DownloadTransactions')?u:u+'/DownloadTransactions';}else{alert('Navigate to a Capital One card page first.');}})();" },
+  capital_one: { label: 'Capital One',  color: 'bg-blue-900/40 text-blue-300 border-blue-800',       exportUrl: 'https://myaccounts.capitalone.com/',                                                                  hint: 'Open your card page, copy the URL from the address bar, paste it below', urlBuilder: true },
   discover:    { label: 'Discover',     color: 'bg-orange-900/40 text-orange-300 border-orange-800', exportUrl: 'https://portal.discover.com/customersvcs/universalLogin/ac_main',                                    hint: 'Statements & Activity → Download → Spreadsheet' },
   venmo:       { label: 'Venmo',        color: 'bg-teal-900/40 text-teal-300 border-teal-800',        exportUrl: 'https://account.venmo.com/settings/statements',                                                     hint: 'Select month → Download CSV' },
   amazon:      { label: 'Amazon',       color: 'bg-yellow-900/40 text-yellow-300 border-yellow-800', exportUrl: 'https://www.amazon.com/gp/b2b/reports',                                                              hint: 'Order History Reports → Request Report → Download' },
@@ -32,6 +30,34 @@ const fmtDate = (s) => s ? new Date(s + (s.length === 10 ? 'T00:00:00' : '')).to
 // ---------------------------------------------------------------------------
 // Small reusable components
 // ---------------------------------------------------------------------------
+
+function CapitalOneUrlBuilder() {
+  const [url, setUrl] = useState('')
+  const dest = (() => {
+    try {
+      const clean = url.split('?')[0].replace(/\/+$/, '')
+      return clean.includes('/Card/') ? clean + '/DownloadTransactions' : null
+    } catch { return null }
+  })()
+  return (
+    <div className="flex gap-1.5 mt-1">
+      <input
+        type="text"
+        value={url}
+        onChange={e => setUrl(e.target.value)}
+        placeholder="Paste Capital One card URL…"
+        className="min-w-0 flex-1 rounded border border-neutral-700 bg-neutral-800 px-2 py-1 text-[10px] text-neutral-300 placeholder-neutral-600 outline-none focus:border-neutral-500"
+      />
+      <button
+        disabled={!dest}
+        onClick={() => window.open(dest, '_blank', 'noopener')}
+        className="shrink-0 rounded border border-blue-800 bg-blue-950/40 px-2 py-1 text-[10px] font-medium text-blue-400 transition-colors hover:bg-blue-950/70 disabled:cursor-not-allowed disabled:opacity-30"
+      >
+        Go →
+      </button>
+    </div>
+  )
+}
 
 function SourceBadge({ source }) {
   const s = SOURCES[source]
@@ -131,17 +157,7 @@ function ImportTab({ activePeriod, onImported }) {
                 <ExternalLink size={10} className="text-neutral-700 group-hover:text-neutral-500 transition-colors" />
               </a>
               <p className="text-[10px] text-neutral-600 leading-relaxed">{s.hint}</p>
-              {s.bookmarklet && (
-                <a
-                  href={s.bookmarklet}
-                  onClick={e => e.preventDefault()}
-                  draggable
-                  title="Drag to bookmarks bar"
-                  className="inline-flex items-center gap-1.5 rounded border border-dashed border-blue-800 bg-blue-950/30 px-2 py-1 text-[10px] text-blue-400 cursor-grab active:cursor-grabbing select-none hover:border-blue-700 hover:bg-blue-950/50 transition-colors"
-                >
-                  ⤢ Drag to bookmarks bar
-                </a>
-              )}
+              {s.urlBuilder && <CapitalOneUrlBuilder />}
             </div>
           ))}
         </div>

@@ -56,13 +56,18 @@ const hangingIndent = ViewPlugin.fromClass(class {
 }, { decorations: v => v.decorations })
 
 // Semantic highlight: role/name values in amber-bold, company in sky.
-// role and project name both start as list items ("  - role:"), so require
-// the "- " before the key. company is a continuation key ("    company:").
-// header.name has no dash and is excluded by the name pattern.
+// Uses CSS classes (not inline styles) so the rules can target child spans
+// too — quoted strings get a tok-string span nested inside the mark span,
+// and a plain inline style on the outer span loses to the child's class.
+const semanticHighlightTheme = EditorView.theme({
+  '.cm-yaml-gold, .cm-yaml-gold *': { color: '#fbbf24 !important', fontWeight: '600 !important' },
+  '.cm-yaml-sky,  .cm-yaml-sky  *': { color: '#bae6fd !important' },
+})
+
 const SEMANTIC_KEYS = [
-  { re: /^(\s+-\s+role:\s+)(.+)$/,    style: 'color:#fbbf24;font-weight:600' },
-  { re: /^(\s+-\s+name:\s+)(.+)$/,    style: 'color:#fbbf24;font-weight:600' },
-  { re: /^(\s+company:\s+)(.+)$/,     style: 'color:#bae6fd' },
+  { re: /^(\s+-\s+role:\s+)(.+)$/,  cls: 'cm-yaml-gold' },
+  { re: /^(\s+-\s+name:\s+)(.+)$/,  cls: 'cm-yaml-gold' },
+  { re: /^(\s+company:\s+)(.+)$/,   cls: 'cm-yaml-sky'  },
 ]
 
 const semanticHighlight = ViewPlugin.fromClass(class {
@@ -74,11 +79,11 @@ const semanticHighlight = ViewPlugin.fromClass(class {
       let pos = from
       while (pos <= to) {
         const line = view.state.doc.lineAt(pos)
-        for (const { re, style } of SEMANTIC_KEYS) {
+        for (const { re, cls } of SEMANTIC_KEYS) {
           const m = line.text.match(re)
           if (m) {
             builder.add(line.from + m[1].length, line.from + m[1].length + m[2].length,
-              Decoration.mark({ attributes: { style } }))
+              Decoration.mark({ class: cls }))
             break
           }
         }
@@ -103,6 +108,7 @@ const editorExtensions = [
   syntaxHighlighting(yamlHighlight),
   hangingIndent,
   semanticHighlight,
+  semanticHighlightTheme,
   editorSizeTheme,
 ]
 

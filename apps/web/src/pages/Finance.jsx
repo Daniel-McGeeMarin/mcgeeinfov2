@@ -13,7 +13,7 @@ import {
 const SOURCES = {
   us_bank:     { label: 'US Bank',      color: 'bg-red-900/40 text-red-300 border-red-800',         exportUrl: 'https://onlinebanking.usbank.com/digital/servicing/shellapp/#/account-dashboard',                    hint: 'Select account → Download Transactions' },
   capital_one: { label: 'Capital One',  color: 'bg-blue-900/40 text-blue-300 border-blue-800',       exportUrl: 'https://myaccounts.capitalone.com/',                                                                  hint: 'Open your card page, copy the URL from the address bar, paste it below', urlBuilder: true },
-  discover:    { label: 'Discover',     color: 'bg-orange-900/40 text-orange-300 border-orange-800', exportUrl: 'https://portal.discover.com/customersvcs/universalLogin/ac_main',                                    hint: 'Statements & Activity → Download → Spreadsheet' },
+  discover:    { label: 'Discover',     color: 'bg-orange-900/40 text-orange-300 border-orange-800', exportUrl: 'https://card.discover.com/cardmembersvcs/statements/app/search_results#',                           hint: 'Download → Spreadsheet' },
   venmo:       { label: 'Venmo',        color: 'bg-teal-900/40 text-teal-300 border-teal-800',        exportUrl: 'https://account.venmo.com/settings/statements',                                                     hint: 'Select month → Download CSV' },
   amazon:      { label: 'Amazon',       color: 'bg-yellow-900/40 text-yellow-300 border-yellow-800', exportUrl: 'https://www.amazon.com/gp/b2b/reports',                                                              hint: 'Order History Reports → Request Report → Download' },
 }

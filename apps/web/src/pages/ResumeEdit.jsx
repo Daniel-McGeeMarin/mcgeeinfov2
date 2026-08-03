@@ -55,11 +55,14 @@ const hangingIndent = ViewPlugin.fromClass(class {
   }
 }, { decorations: v => v.decorations })
 
-// Semantic highlight: role/name values in amber-bold, company in sky
+// Semantic highlight: role/name values in amber-bold, company in sky.
+// role and project name both start as list items ("  - role:"), so require
+// the "- " before the key. company is a continuation key ("    company:").
+// header.name has no dash and is excluded by the name pattern.
 const SEMANTIC_KEYS = [
-  { re: /^(\s+role:\s+)(.+)$/,    style: 'color:#fbbf24;font-weight:600' },
-  { re: /^(\s+name:\s+)(.+)$/,    style: 'color:#fbbf24;font-weight:600' },
-  { re: /^(\s+company:\s+)(.+)$/, style: 'color:#bae6fd' },
+  { re: /^(\s+-\s+role:\s+)(.+)$/,    style: 'color:#fbbf24;font-weight:600' },
+  { re: /^(\s+-\s+name:\s+)(.+)$/,    style: 'color:#fbbf24;font-weight:600' },
+  { re: /^(\s+company:\s+)(.+)$/,     style: 'color:#bae6fd' },
 ]
 
 const semanticHighlight = ViewPlugin.fromClass(class {

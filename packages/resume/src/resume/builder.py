@@ -231,7 +231,7 @@ def _exp_bullet(body, text: str):
     _e(pp, "w:pBdr")
     tabs = _e(pp, "w:tabs")
     _e(tabs, "w:tab", {"w:val": "left", "w:leader": "none", "w:pos": "370"})
-    _e(pp, "w:spacing", {"w:before": "33"})
+    _e(pp, "w:spacing", {"w:before": "50"})
     _e(pp, "w:ind", {"w:hanging": "190", "w:left": "370"})
     _e(pp, "w:rPr")
     _rn(p, text)
@@ -307,9 +307,9 @@ def _proj_bullet(body, text: str, idx: int, total: int):
         _e(pp, "w:spacing", {"w:after": "0", "w:afterAutospacing": "0", "w:before": "18"})
     elif idx < total - 1:
         _e(pp, "w:spacing", {"w:after": "0", "w:afterAutospacing": "0",
-                              "w:before": "0", "w:beforeAutospacing": "0"})
+                              "w:before": "20", "w:beforeAutospacing": "0"})
     else:
-        _e(pp, "w:spacing", {"w:before": "0", "w:beforeAutospacing": "0"})
+        _e(pp, "w:spacing", {"w:before": "20", "w:beforeAutospacing": "0"})
 
     _e(pp, "w:ind", {"w:right": "86", "w:hanging": "180", "w:left": "360"})
     _e(pp, "w:rPr")

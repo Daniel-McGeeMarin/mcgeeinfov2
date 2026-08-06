@@ -129,7 +129,6 @@ export default function Survey() {
       className="mx-auto max-w-xl px-6 py-10 lg:py-14"
     >
       <h1 className="text-lg font-semibold text-neutral-100">How Do You Handle AI Coding Drift?</h1>
-      <p className="mt-1 text-sm text-neutral-500">3–4 questions, no pitch.</p>
 
       <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-8">
         {/* Full name */}

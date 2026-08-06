@@ -11,6 +11,7 @@ from api.routers.jobs import router as jobs_router, get_ingester
 from api.routers.modelfit import router as modelfit_router
 from api.routers.resume import router as resume_router
 from api.routers.finance import router as finance_router
+from api.routers.survey import router as survey_router
 
 logger = logging.getLogger(__name__)
 
@@ -55,6 +56,7 @@ app.include_router(jobs_router)
 app.include_router(modelfit_router)
 app.include_router(resume_router)
 app.include_router(finance_router)
+app.include_router(survey_router)
 
 app.add_middleware(
     CORSMiddleware,

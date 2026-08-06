@@ -45,7 +45,7 @@ class SurveyRequest(BaseModel):
     full_name: str | None = None
     uses_ai: bool
     drift_how: list[str] | None = None
-    drift_severity: str | None = None
+    drift_severity: list[str] | None = None
     wants_results: bool = False
     email: str | None = None
 
@@ -65,7 +65,7 @@ def submit(req: SurveyRequest):
                 req.full_name or None,
                 int(req.uses_ai),
                 json.dumps(req.drift_how) if req.drift_how else None,
-                req.drift_severity,
+                json.dumps(req.drift_severity) if req.drift_severity else None,
                 int(req.wants_results),
                 req.email or None,
             ),
@@ -93,7 +93,10 @@ def results():
             for val in json.loads(r["drift_how"]):
                 drift_counts[val] = drift_counts.get(val, 0) + 1
         if r["drift_severity"]:
-            severity_counts[r["drift_severity"]] = severity_counts.get(r["drift_severity"], 0) + 1
+            raw_sev = r["drift_severity"]
+            vals = json.loads(raw_sev) if raw_sev.startswith("[") else [raw_sev]
+            for val in vals:
+                severity_counts[val] = severity_counts.get(val, 0) + 1
         if r["wants_results"] and r["email"]:
             want_results.append({"name": r["full_name"], "email": r["email"]})
 
@@ -104,7 +107,7 @@ def results():
             "full_name": r["full_name"],
             "uses_ai": bool(r["uses_ai"]),
             "drift_how": json.loads(r["drift_how"]) if r["drift_how"] else None,
-            "drift_severity": r["drift_severity"],
+            "drift_severity": (json.loads(r["drift_severity"]) if r["drift_severity"] and r["drift_severity"].startswith("[") else ([r["drift_severity"]] if r["drift_severity"] else None)),
             "wants_results": bool(r["wants_results"]),
             "email": r["email"],
         }

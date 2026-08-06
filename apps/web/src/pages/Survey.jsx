@@ -65,7 +65,7 @@ export default function Survey() {
   const [fullName, setFullName] = useState('')
   const [usesAi, setUsesAi] = useState(null)
   const [driftHow, setDriftHow] = useState([])
-  const [severity, setSeverity] = useState('')
+  const [severity, setSeverity] = useState([])
   const [wantsResults, setWantsResults] = useState(null)
   const [email, setEmail] = useState('')
   const [submitted, setSubmitted] = useState(false)
@@ -90,7 +90,7 @@ export default function Survey() {
           full_name: fullName || null,
           uses_ai: usesAi === 'yes',
           drift_how: usesAi === 'yes' ? driftHow : null,
-          drift_severity: usesAi === 'yes' ? severity || null : null,
+          drift_severity: usesAi === 'yes' ? (severity.length ? severity : null) : null,
           wants_results: wantsResults === 'yes',
           email: wantsResults === 'yes' ? email || null : null,
         }),
@@ -193,16 +193,17 @@ export default function Survey() {
             {/* Q3 */}
             <fieldset>
               <legend className="text-sm font-medium text-neutral-200 mb-3">
-                3. Which best describes your experience with AI drift?
+                3. Which of these apply to your experience with AI drift? (select all that apply)
               </legend>
               <div className="flex flex-col gap-2.5">
                 {SEVERITY_OPTIONS.map(opt => (
-                  <Radio
+                  <Checkbox
                     key={opt.value}
-                    name="severity"
                     value={opt.value}
-                    checked={severity === opt.value}
-                    onChange={() => setSeverity(opt.value)}
+                    checked={severity.includes(opt.value)}
+                    onChange={() => setSeverity(prev =>
+                      prev.includes(opt.value) ? prev.filter(v => v !== opt.value) : [...prev, opt.value]
+                    )}
                     label={opt.label}
                   />
                 ))}

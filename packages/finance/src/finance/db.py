@@ -54,6 +54,17 @@ class FinanceDB:
                 new_count   INTEGER,
                 dupe_count  INTEGER
             );
+
+            CREATE TABLE IF NOT EXISTS plaid_items (
+                item_id          TEXT PRIMARY KEY,
+                access_token     TEXT NOT NULL,
+                institution_id   TEXT NOT NULL,
+                institution_name TEXT NOT NULL,
+                source_id        TEXT NOT NULL,
+                cursor           TEXT,
+                linked_at        TEXT NOT NULL,
+                last_synced_at   TEXT
+            );
         """)
         self._conn.commit()
 
@@ -235,3 +246,53 @@ class FinanceDB:
             "SELECT * FROM import_log ORDER BY imported_at DESC LIMIT ?", (limit,)
         ).fetchall()
         return [dict(r) for r in rows]
+
+    # ------------------------------------------------------------------
+    # Plaid items
+    # ------------------------------------------------------------------
+
+    def upsert_plaid_item(
+        self,
+        item_id: str,
+        access_token: str,
+        institution_id: str,
+        institution_name: str,
+        source_id: str,
+    ) -> dict:
+        now = _now()
+        self._conn.execute(
+            """INSERT INTO plaid_items (item_id, access_token, institution_id, institution_name, source_id, linked_at)
+               VALUES (?,?,?,?,?,?)
+               ON CONFLICT(item_id) DO UPDATE SET
+                   access_token=excluded.access_token,
+                   institution_name=excluded.institution_name,
+                   source_id=excluded.source_id""",
+            (item_id, access_token, institution_id, institution_name, source_id, now),
+        )
+        self._conn.commit()
+        return self.get_plaid_item(item_id)
+
+    def get_plaid_item(self, item_id: str) -> dict | None:
+        row = self._conn.execute("SELECT * FROM plaid_items WHERE item_id=?", (item_id,)).fetchone()
+        return dict(row) if row else None
+
+    def list_plaid_items(self) -> list[dict]:
+        rows = self._conn.execute("SELECT * FROM plaid_items ORDER BY linked_at DESC").fetchall()
+        return [dict(r) for r in rows]
+
+    def delete_plaid_item(self, item_id: str) -> bool:
+        cur = self._conn.execute("DELETE FROM plaid_items WHERE item_id=?", (item_id,))
+        self._conn.commit()
+        return cur.rowcount > 0
+
+    def update_plaid_cursor(self, item_id: str, cursor: str) -> None:
+        self._conn.execute(
+            "UPDATE plaid_items SET cursor=?, last_synced_at=? WHERE item_id=?",
+            (cursor, _now(), item_id),
+        )
+        self._conn.commit()
+
+    def delete_transaction(self, tx_id: str) -> bool:
+        cur = self._conn.execute("DELETE FROM transactions WHERE id=?", (tx_id,))
+        self._conn.commit()
+        return cur.rowcount > 0

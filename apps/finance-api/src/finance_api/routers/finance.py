@@ -8,7 +8,7 @@ from typing import Annotated
 from fastapi import APIRouter, HTTPException, Query, UploadFile
 from pydantic import BaseModel
 
-from finance import FinanceDB, detect_and_parse, label_transaction
+from finance import FinanceDB, detect_and_parse, label_transaction, plaid_client
 
 router = APIRouter(prefix="/api/finance", tags=["finance"])
 
@@ -169,3 +169,96 @@ def bulk_label(req: BulkLabelRequest):
     updates = [u.model_dump() for u in req.updates]
     count = _db.bulk_update_transactions(updates)
     return {"updated": count}
+
+
+# ------------------------------------------------------------------
+# Plaid
+# ------------------------------------------------------------------
+
+
+@router.post("/plaid/link-token")
+def plaid_link_token():
+    try:
+        token = plaid_client.create_link_token()
+    except Exception as e:
+        raise HTTPException(500, f"Plaid error: {e}")
+    return {"link_token": token}
+
+
+class PlaidExchangeRequest(BaseModel):
+    public_token: str
+    institution_id: str
+    institution_name: str
+
+
+@router.post("/plaid/exchange", status_code=201)
+def plaid_exchange(req: PlaidExchangeRequest):
+    try:
+        result = plaid_client.exchange_public_token(req.public_token)
+    except Exception as e:
+        raise HTTPException(500, f"Plaid error: {e}")
+    source_id = plaid_client.institution_to_source(req.institution_name)
+    item = _db.upsert_plaid_item(
+        item_id=result["item_id"],
+        access_token=result["access_token"],
+        institution_id=req.institution_id,
+        institution_name=req.institution_name,
+        source_id=source_id,
+    )
+    return {k: v for k, v in item.items() if k != "access_token"}
+
+
+@router.post("/plaid/sync")
+def plaid_sync(item_id: str | None = None):
+    items = [_db.get_plaid_item(item_id)] if item_id else _db.list_plaid_items()
+    if not items or items[0] is None:
+        raise HTTPException(404, "Item not found")
+
+    active_period = _db.get_active_period()
+    results = []
+
+    for item in items:
+        try:
+            data = plaid_client.sync_transactions(item["access_token"], item.get("cursor"))
+        except Exception as e:
+            results.append({"item_id": item["item_id"], "error": str(e)})
+            continue
+
+        new_count = dupe_count = removed_count = 0
+        for tx in data["added"]:
+            row = plaid_client.plaid_tx_to_row(tx, item["source_id"])
+            row["reimbursable"] = label_transaction(row["description"], row.get("category"), row["amount"])
+            if active_period and row["date"] >= active_period["opened_at"][:10]:
+                row["period_id"] = active_period["id"]
+            if _db.upsert_transaction(row):
+                new_count += 1
+            else:
+                dupe_count += 1
+
+        for tx_id in data["removed_ids"]:
+            if _db.delete_transaction(tx_id):
+                removed_count += 1
+
+        _db.update_plaid_cursor(item["item_id"], data["next_cursor"])
+        _db.log_import(item["source_id"], "plaid-sync", new_count + dupe_count, new_count, dupe_count)
+        results.append({
+            "item_id": item["item_id"],
+            "institution_name": item["institution_name"],
+            "new": new_count,
+            "duplicates": dupe_count,
+            "removed": removed_count,
+        })
+
+    return {"synced": results}
+
+
+@router.get("/plaid/items")
+def list_plaid_items():
+    items = _db.list_plaid_items()
+    return {"items": [{k: v for k, v in item.items() if k != "access_token"} for item in items]}
+
+
+@router.delete("/plaid/items/{item_id}", status_code=204)
+def delete_plaid_item(item_id: str):
+    if not _db.delete_plaid_item(item_id):
+        raise HTTPException(404, "Item not found")

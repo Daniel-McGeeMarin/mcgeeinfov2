@@ -53,4 +53,17 @@ export const financeApi = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ updates }),
     }),
+
+  plaidLinkToken: () => financeRequest('/plaid/link-token', { method: 'POST' }),
+  plaidExchange: (publicToken, institutionId, institutionName) =>
+    financeRequest('/plaid/exchange', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ public_token: publicToken, institution_id: institutionId, institution_name: institutionName }),
+    }),
+  plaidSync: (itemId = null) =>
+    financeRequest(`/plaid/sync${itemId ? `?item_id=${encodeURIComponent(itemId)}` : ''}`, { method: 'POST' }),
+  plaidItems: () => financeRequest('/plaid/items'),
+  plaidDeleteItem: (itemId) =>
+    financeRequest(`/plaid/items/${encodeURIComponent(itemId)}`, { method: 'DELETE' }),
 }

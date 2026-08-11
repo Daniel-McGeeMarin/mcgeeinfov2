@@ -2,7 +2,7 @@
 name = "finance"
 version = "0.1.0"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = ["plaid-python>=9.0.0"]
 
 [build-system]
 requires = ["hatchling"]

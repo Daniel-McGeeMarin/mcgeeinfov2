@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { usePlaidLink } from 'react-plaid-link'
 import { motion } from 'framer-motion'
 import { financeApi } from './api'
 import {
   Upload, Check, X, HelpCircle, Lock, ChevronDown, ChevronUp,
-  ExternalLink, AlertTriangle, History, LayoutList, Import, Wallet,
+  ExternalLink, AlertTriangle, History, LayoutList, Import, Wallet, RefreshCw, Trash2,
 } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
@@ -99,6 +100,13 @@ function EmptyState({ icon: Icon, title, body }) {
   )
 }
 
+// Mounts Plaid Link as an invisible component and auto-opens when ready
+function PlaidLinkOpener({ token, onSuccess, onExit }) {
+  const { open, ready } = usePlaidLink({ token, onSuccess, onExit })
+  useEffect(() => { if (ready) open() }, [ready, open])
+  return null
+}
+
 // ---------------------------------------------------------------------------
 // Tab: Import
 // ---------------------------------------------------------------------------
@@ -111,9 +119,23 @@ function ImportTab({ activePeriod, onImported }) {
   const [importLog, setImportLog] = useState([])
   const inputRef = useRef(null)
 
+  // Plaid state
+  const [plaidItems, setPlaidItems] = useState([])
+  const [linkToken, setLinkToken] = useState(null)
+  const [syncing, setSyncing] = useState(false)
+  const [syncResult, setSyncResult] = useState(null)
+  const [connectError, setConnectError] = useState(null)
+  const [connecting, setConnecting] = useState(false)
+
   useEffect(() => {
     financeApi.getImportLog().then(r => setImportLog(r.log)).catch(() => {})
   }, [lastResult])
+
+  const loadPlaidItems = useCallback(() => {
+    financeApi.plaidItems().then(r => setPlaidItems(r.items)).catch(() => {})
+  }, [])
+
+  useEffect(() => { loadPlaidItems() }, [loadPlaidItems])
 
   const handleFile = useCallback(async (file) => {
     if (!file || !file.name.endsWith('.csv')) {
@@ -139,8 +161,150 @@ function ImportTab({ activePeriod, onImported }) {
     handleFile(e.dataTransfer.files[0])
   }, [handleFile])
 
+  const startConnect = useCallback(async () => {
+    setConnectError(null)
+    setConnecting(true)
+    try {
+      const r = await financeApi.plaidLinkToken()
+      setLinkToken(r.link_token)
+    } catch (e) {
+      setConnectError(e.message)
+      setConnecting(false)
+    }
+  }, [])
+
+  const handlePlaidSuccess = useCallback(async (publicToken, metadata) => {
+    setLinkToken(null)
+    setConnecting(false)
+    try {
+      await financeApi.plaidExchange(
+        publicToken,
+        metadata.institution.institution_id,
+        metadata.institution.name,
+      )
+      loadPlaidItems()
+    } catch (e) {
+      setConnectError(e.message)
+    }
+  }, [loadPlaidItems])
+
+  const handlePlaidExit = useCallback(() => {
+    setLinkToken(null)
+    setConnecting(false)
+  }, [])
+
+  const handleSync = useCallback(async (itemId) => {
+    setSyncing(true)
+    setSyncResult(null)
+    setConnectError(null)
+    try {
+      const r = await financeApi.plaidSync(itemId)
+      setSyncResult(r.synced)
+      onImported()
+      loadPlaidItems()
+    } catch (e) {
+      setConnectError(e.message)
+    } finally {
+      setSyncing(false)
+    }
+  }, [loadPlaidItems, onImported])
+
+  const handleDisconnect = useCallback(async (itemId) => {
+    try {
+      await financeApi.plaidDeleteItem(itemId)
+      loadPlaidItems()
+    } catch (e) {
+      setConnectError(e.message)
+    }
+  }, [loadPlaidItems])
+
   return (
     <div className="space-y-8">
+      {/* Connected bank accounts */}
+      <div>
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-neutral-600">Connected accounts</p>
+        <div className="space-y-2">
+          {plaidItems.map(item => (
+            <div key={item.item_id} className="flex items-center gap-3 rounded-lg border border-neutral-800 bg-neutral-900/50 px-4 py-3">
+              <SourceBadge source={item.source_id} />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium text-neutral-300">{item.institution_name}</p>
+                <p className="text-[10px] text-neutral-600">
+                  {item.last_synced_at
+                    ? `Last synced ${fmtDate(item.last_synced_at.split('T')[0])}`
+                    : 'Never synced'}
+                </p>
+              </div>
+              <button
+                onClick={() => handleSync(item.item_id)}
+                disabled={syncing}
+                className="flex items-center gap-1 rounded border border-neutral-700 px-2.5 py-1 text-[10px] font-medium text-neutral-400 transition-colors hover:border-neutral-500 hover:text-neutral-200 disabled:opacity-40"
+              >
+                <RefreshCw size={9} />
+                {syncing ? 'Syncing…' : 'Sync'}
+              </button>
+              <button
+                onClick={() => handleDisconnect(item.item_id)}
+                className="flex items-center gap-1 rounded border border-red-900/40 px-2.5 py-1 text-[10px] font-medium text-red-500/60 transition-colors hover:border-red-800 hover:text-red-400"
+              >
+                <Trash2 size={9} />
+                Disconnect
+              </button>
+            </div>
+          ))}
+          {plaidItems.length > 1 && (
+            <button
+              onClick={() => handleSync(null)}
+              disabled={syncing}
+              className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-neutral-800 px-4 py-2 text-[10px] font-medium text-neutral-600 transition-colors hover:border-neutral-700 hover:text-neutral-400 disabled:opacity-40"
+            >
+              <RefreshCw size={9} />
+              {syncing ? 'Syncing all…' : 'Sync all accounts'}
+            </button>
+          )}
+        </div>
+
+        <button
+          onClick={startConnect}
+          disabled={connecting}
+          className="mt-3 flex items-center gap-1.5 rounded-lg border border-dashed border-neutral-700 px-4 py-2.5 text-xs font-medium text-neutral-500 transition-colors hover:border-neutral-500 hover:text-neutral-300 disabled:opacity-40"
+        >
+          {connecting
+            ? <><div className="h-3 w-3 animate-spin rounded-full border border-neutral-600 border-t-neutral-300" /> Connecting…</>
+            : '+ Connect bank account'
+          }
+        </button>
+
+        {linkToken && (
+          <PlaidLinkOpener token={linkToken} onSuccess={handlePlaidSuccess} onExit={handlePlaidExit} />
+        )}
+
+        {connectError && (
+          <div className="mt-2 flex items-center gap-2 rounded-lg border border-red-900/50 bg-red-950/30 px-3 py-2 text-xs text-red-400">
+            <X size={12} /> {connectError}
+          </div>
+        )}
+
+        {syncResult && syncResult.length > 0 && (
+          <div className="mt-2 space-y-1">
+            {syncResult.map((r, i) => (
+              <div
+                key={i}
+                className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs ${r.error ? 'border-red-900/50 bg-red-950/30 text-red-400' : 'border-emerald-900/50 bg-emerald-950/30 text-emerald-400'}`}
+              >
+                {r.error ? <X size={12} /> : <Check size={12} />}
+                <span>
+                  <strong>{r.institution_name ?? r.item_id}</strong>
+                  {r.error
+                    ? ` — ${r.error}`
+                    : ` — ${r.new} new, ${r.duplicates} dupes${r.removed > 0 ? `, ${r.removed} removed` : ''}`}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* Source cards with export links */}
       <div>
         <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-neutral-600">Export your data</p>

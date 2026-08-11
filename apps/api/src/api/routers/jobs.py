@@ -9,7 +9,7 @@ from fastapi import APIRouter, BackgroundTasks, HTTPException, Query
 from pydantic import BaseModel
 
 from jobs.db import DB
-from jobs.enrichment import run_enrichment_pass
+from jobs.enrichment import retag_high_impact, run_enrichment_pass
 from jobs.ingester import Ingester
 from jobs.mappers import MAPPER_BY_ID
 
@@ -51,6 +51,12 @@ def enrich(
     limit: Annotated[int, Query(ge=1, le=200)] = 50,
 ):
     background_tasks.add_task(run_enrichment_pass, _db, limit)
+    return {"status": "started"}
+
+
+@router.post("/retag")
+def retag(background_tasks: BackgroundTasks):
+    background_tasks.add_task(retag_high_impact, _db)
     return {"status": "started"}
 
 

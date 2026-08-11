@@ -176,14 +176,14 @@ def enrich_job(job: dict) -> dict[str, Any]:
     if detect_workday(apply_url):
         new_tags.append("workday")
 
+    if detect_high_impact(company):
+        new_tags.append("high_impact")
+
     if apply_type == "js_required":
         return {"apply_type": "js_required", "enrichment_status": "js_required", "new_tags": new_tags}
 
     if apply_type == "fast_apply":
         new_tags.append("fast_apply")
-
-    if detect_high_impact(company):
-        new_tags.append("high_impact")
 
     if not apply_url:
         return {"apply_type": apply_type, "enrichment_status": "done", "new_tags": new_tags}
@@ -208,6 +208,22 @@ def enrich_job(job: dict) -> dict[str, Any]:
         "enrichment_status": "done",
         "new_tags":         new_tags,
     }
+
+
+def retag_high_impact(db: DB) -> dict[str, int]:
+    """Re-evaluate high_impact for every job and add or remove the tag as needed."""
+    jobs = db.get_all_jobs_lightweight()
+    add_ids: set[str] = set()
+    remove_ids: set[str] = set()
+    for job in jobs:
+        should_have = detect_high_impact(job.get("company") or "")
+        has_tag = "high_impact" in (job.get("tags") or [])
+        if should_have and not has_tag:
+            add_ids.add(job["id"])
+        elif not should_have and has_tag:
+            remove_ids.add(job["id"])
+    db.apply_retag("high_impact", add_ids, remove_ids)
+    return {"added": len(add_ids), "removed": len(remove_ids), "total": len(jobs)}
 
 
 def run_enrichment_pass(db: DB, limit: int = 50) -> dict[str, int]:

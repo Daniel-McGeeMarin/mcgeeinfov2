@@ -203,6 +203,46 @@ class DB:
     # Enrichment
     # ------------------------------------------------------------------
 
+    def get_all_jobs_lightweight(self) -> list[dict]:
+        """Return (id, company, tags) for every job — used for retag passes."""
+        rows = self._conn.execute("SELECT id, company, tags FROM jobs").fetchall()
+        result = []
+        for r in rows:
+            d = dict(r)
+            if isinstance(d.get("tags"), str):
+                try:
+                    d["tags"] = json.loads(d["tags"])
+                except Exception:
+                    d["tags"] = []
+            result.append(d)
+        return result
+
+    def apply_retag(self, tag: str, add_ids: set[str], remove_ids: set[str]) -> None:
+        """Add or remove a single tag from jobs in bulk, in one transaction."""
+        with self._conn:
+            for job_id in add_ids:
+                row = self._conn.execute("SELECT tags FROM jobs WHERE id=?", (job_id,)).fetchone()
+                if row is None:
+                    continue
+                try:
+                    tags = json.loads(row["tags"] or "[]")
+                except Exception:
+                    tags = []
+                if tag not in tags:
+                    tags = sorted(set(tags) | {tag})
+                    self._conn.execute("UPDATE jobs SET tags=? WHERE id=?", (json.dumps(tags), job_id))
+            for job_id in remove_ids:
+                row = self._conn.execute("SELECT tags FROM jobs WHERE id=?", (job_id,)).fetchone()
+                if row is None:
+                    continue
+                try:
+                    tags = json.loads(row["tags"] or "[]")
+                except Exception:
+                    tags = []
+                if tag in tags:
+                    tags = sorted(t for t in tags if t != tag)
+                    self._conn.execute("UPDATE jobs SET tags=? WHERE id=?", (json.dumps(tags), job_id))
+
     def get_unenriched_jobs(self, limit: int = 50) -> list[dict]:
         rows = self._conn.execute(
             "SELECT * FROM jobs WHERE enrichment_status IS NULL AND apply_url IS NOT NULL LIMIT ?",

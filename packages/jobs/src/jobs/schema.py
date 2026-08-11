@@ -149,3 +149,9 @@ HIGH_IMPACT_COMPANIES: frozenset[str] = frozenset({
     "bloomberg", "goldman sachs", "morgan stanley", "jpmorgan", "jp morgan",
     "capital one", "fidelity", "blackrock",
 })
+
+
+def company_list_hash() -> str:
+    """Stable 16-char hex fingerprint of HIGH_IMPACT_COMPANIES. Changes when the list changes."""
+    import json
+    return hashlib.sha256(json.dumps(sorted(HIGH_IMPACT_COMPANIES)).encode()).hexdigest()[:16]

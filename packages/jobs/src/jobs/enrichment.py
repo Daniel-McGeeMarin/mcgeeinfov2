@@ -211,7 +211,16 @@ def enrich_job(job: dict) -> dict[str, Any]:
 
 
 def retag_high_impact(db: DB) -> dict[str, int]:
-    """Re-evaluate high_impact for every job and add or remove the tag as needed."""
+    """Re-evaluate high_impact for every job and add or remove the tag as needed.
+
+    Skipped automatically if the company list hash hasn't changed since the last run.
+    Returns counts plus a 'skipped' key when no-op.
+    """
+    from .schema import company_list_hash
+    current_hash = company_list_hash()
+    if not db.needs_retag(current_hash):
+        return {"skipped": True, "added": 0, "removed": 0, "total": 0}
+
     jobs = db.get_all_jobs_lightweight()
     add_ids: set[str] = set()
     remove_ids: set[str] = set()
@@ -223,7 +232,8 @@ def retag_high_impact(db: DB) -> dict[str, int]:
         elif not should_have and has_tag:
             remove_ids.add(job["id"])
     db.apply_retag("high_impact", add_ids, remove_ids)
-    return {"added": len(add_ids), "removed": len(remove_ids), "total": len(jobs)}
+    db.mark_retag_done(current_hash)
+    return {"skipped": False, "added": len(add_ids), "removed": len(remove_ids), "total": len(jobs)}
 
 
 def run_enrichment_pass(db: DB, limit: int = 50) -> dict[str, int]:

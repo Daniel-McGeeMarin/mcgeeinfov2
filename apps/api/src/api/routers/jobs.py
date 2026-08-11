@@ -18,6 +18,13 @@ router = APIRouter(prefix="/api/jobs", tags=["jobs"])
 _db = DB(Path(os.environ.get("JOBS_DB_PATH", "./jobs.db")))
 _ingester = Ingester(_db)
 
+# Retag high_impact on startup whenever the company list has changed.
+# List changes only happen on deploy (code change), which always restarts the server,
+# so this runs exactly once per list version with no manual intervention needed.
+_startup_retag = retag_high_impact(_db)
+if not _startup_retag.get("skipped"):
+    print(f"[jobs] startup retag: +{_startup_retag['added']} / -{_startup_retag['removed']} high_impact tags ({_startup_retag['total']} jobs)")
+
 
 def get_ingester() -> Ingester:
     return _ingester

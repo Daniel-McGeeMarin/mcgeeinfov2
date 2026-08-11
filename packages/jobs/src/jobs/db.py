@@ -203,6 +203,23 @@ class DB:
     # Enrichment
     # ------------------------------------------------------------------
 
+    def needs_retag(self, current_hash: str) -> bool:
+        """True if the stored high_impact company-list hash differs from current_hash."""
+        row = self._conn.execute(
+            "SELECT name FROM schema_migrations WHERE name LIKE 'high_impact_retag_%'"
+        ).fetchone()
+        if row is None:
+            return True
+        return row[0] != f"high_impact_retag_{current_hash}"
+
+    def mark_retag_done(self, current_hash: str) -> None:
+        self._conn.execute("DELETE FROM schema_migrations WHERE name LIKE 'high_impact_retag_%'")
+        self._conn.execute(
+            "INSERT INTO schema_migrations (name, applied_at) VALUES (?, ?)",
+            (f"high_impact_retag_{current_hash}", _now()),
+        )
+        self._conn.commit()
+
     def get_all_jobs_lightweight(self) -> list[dict]:
         """Return (id, company, tags) for every job — used for retag passes."""
         rows = self._conn.execute("SELECT id, company, tags FROM jobs").fetchall()

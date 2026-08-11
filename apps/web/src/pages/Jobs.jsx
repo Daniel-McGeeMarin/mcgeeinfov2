@@ -439,9 +439,10 @@ export default function Jobs() {
               {jobs.map((job) => (
                 <tr
                   key={job.id}
+                  onClick={() => !job.in_queue && handleAddToQueue(job.id)}
                   className={`border-b border-neutral-900 hover:bg-neutral-900/40 transition-colors ${
                     job.tags?.includes('closed') ? 'opacity-40' : ''
-                  }`}
+                  } ${!job.in_queue ? 'cursor-pointer' : ''}`}
                 >
                   <td className="px-4 py-2.5 font-medium text-neutral-100 whitespace-nowrap">
                     {job.company}
@@ -474,13 +475,14 @@ export default function Jobs() {
                           href={job.apply_url}
                           target="_blank"
                           rel="noopener noreferrer"
+                          onClick={e => e.stopPropagation()}
                           className="text-xs text-amber-400 hover:text-amber-300"
                         >
                           Apply →
                         </a>
                       )}
                       <button
-                        onClick={() => handleAddToQueue(job.id)}
+                        onClick={e => { e.stopPropagation(); handleAddToQueue(job.id) }}
                         disabled={job.in_queue}
                         className={`text-xs px-2 py-1 rounded transition-colors ${
                           job.in_queue

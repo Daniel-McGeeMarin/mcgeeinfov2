@@ -58,9 +58,15 @@ export default function WebAppCard({ app, index }) {
   if (isLive) {
     return (
       <motion.div {...motionProps}>
-        <Link to={app.href} className={className}>
-          {inner}
-        </Link>
+        {app.external ? (
+          <a href={app.href} target="_blank" rel="noopener noreferrer" className={className}>
+            {inner}
+          </a>
+        ) : (
+          <Link to={app.href} className={className}>
+            {inner}
+          </Link>
+        )}
       </motion.div>
     )
   }

@@ -341,6 +341,15 @@ export default function Jobs() {
     }
   }
 
+  const handleRemoveFromQueue = async (jobId) => {
+    try {
+      await jobsApi.removeFromQueue(jobId)
+      setAllJobs(prev => prev.map(j => j.id === jobId ? { ...j, in_queue: false } : j))
+    } catch (e) {
+      setActionMsg(`Queue error: ${e.message}`)
+    }
+  }
+
   const tagOptions = FILTERABLE_TAGS.map(t => ({ value: t, label: TAG_META[t]?.label ?? t }))
   const sourceOptions = sources.map(s => ({
     value: s.source_id,
@@ -497,15 +506,14 @@ export default function Jobs() {
                         </a>
                       )}
                       <button
-                        onClick={e => { e.stopPropagation(); handleAddToQueue(job.id) }}
-                        disabled={job.in_queue}
+                        onClick={e => { e.stopPropagation(); job.in_queue ? handleRemoveFromQueue(job.id) : handleAddToQueue(job.id) }}
                         className={`text-xs px-2 py-1 rounded transition-colors ${
                           job.in_queue
-                            ? 'text-neutral-600 cursor-default'
+                            ? 'text-red-400/70 hover:text-red-300 hover:bg-red-950/40'
                             : 'text-neutral-400 hover:text-neutral-100 hover:bg-neutral-800'
                         }`}
                       >
-                        {job.in_queue ? '✓ Queued' : '+ Queue'}
+                        {job.in_queue ? '− Remove' : '+ Queue'}
                       </button>
                     </div>
                   </td>

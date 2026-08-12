@@ -453,9 +453,11 @@ export default function Jobs() {
                 <tr
                   key={job.id}
                   onClick={() => !job.in_queue && handleAddToQueue(job.id)}
-                  className={`border-b border-neutral-900 hover:bg-neutral-900/40 transition-colors ${
-                    job.tags?.includes('closed') ? 'opacity-40' : ''
-                  } ${!job.in_queue ? 'cursor-pointer' : ''}`}
+                  className={`border-b transition-colors ${
+                    job.in_queue
+                      ? 'bg-amber-950/30 border-amber-900/30 hover:bg-amber-950/50'
+                      : 'border-neutral-900 hover:bg-neutral-900/40 cursor-pointer'
+                  } ${job.tags?.includes('closed') ? 'opacity-40' : ''}`}
                 >
                   <td className="px-4 py-2.5 font-medium text-neutral-100 whitespace-nowrap">
                     {job.company}

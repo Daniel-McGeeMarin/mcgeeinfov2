@@ -65,6 +65,7 @@ export const jobsApi = {
   refreshOne: (sourceId) => jobsRequest(`/refresh/${sourceId}`, { method: 'POST' }),
 
   enrich: (limit = 50) => jobsRequest(`/enrich?limit=${limit}`, { method: 'POST' }),
+  retag: () => jobsRequest('/retag', { method: 'POST' }),
 
   getQueue: () => jobsRequest('/queue'),
   addToQueue: (jobId, priority = 3) =>

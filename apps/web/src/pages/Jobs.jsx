@@ -322,6 +322,16 @@ export default function Jobs() {
     }
   }
 
+  const handleRetag = async () => {
+    setActionMsg('Retagging…')
+    try {
+      const res = await jobsApi.retag()
+      setActionMsg(res.skipped ? 'Retag: no-op (company list unchanged).' : `Retag done — +${res.added} / −${res.removed} high_impact tags.`)
+    } catch (e) {
+      setActionMsg(`Error: ${e.message}`)
+    }
+  }
+
   const handleAddToQueue = async (jobId) => {
     try {
       await jobsApi.addToQueue(jobId)
@@ -362,6 +372,9 @@ export default function Jobs() {
           </button>
           <button onClick={handleEnrich} className="rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-1.5 text-xs text-neutral-400 hover:text-neutral-200 hover:border-neutral-700 transition-colors">
             Enrich (50)
+          </button>
+          <button onClick={handleRetag} className="rounded-lg border border-neutral-800 bg-neutral-900 px-3 py-1.5 text-xs text-neutral-500 hover:text-neutral-300 hover:border-neutral-700 transition-colors">
+            Retag
           </button>
         </div>
       </div>
